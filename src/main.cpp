@@ -1,5 +1,4 @@
 #include "menu.h"
-#include <fstream>
 #include <iostream>
 
 int algorithms(void) {
@@ -18,11 +17,10 @@ int finish(void) {
 }
 
 int main(void) {
-  std::fstream f("menu.json");
-  Menu::Register("algorithms", algorithms);
-  Menu::Read(f);
-  Menu::Register("settings", settings);
-  Menu::Register("finish", finish);
-  Menu::Start();
+  Menu menu("menu.json");
+  menu.Register("algorithms", algorithms)
+      .Register("settings", settings)
+      .Register("finish", finish);
+  menu.Start();
   return 0;
 }

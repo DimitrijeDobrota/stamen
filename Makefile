@@ -5,7 +5,7 @@ SRC = src
 INC = include
 BUILD = build
 
-CFLAGS = -I$(INC)
+CFLAGS = -I$(INC) --std=c++17
 LDFLAGS = 
 
 SRCS := $(wildcard $(SRC)/*.cpp)
