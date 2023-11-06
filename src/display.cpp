@@ -2,7 +2,7 @@
 #include <iostream>
 
 int Menu::Menu_function::display() const {
-  unsigned long choice;
+  int choice;
   while (true) {
     std::cout << name << std::endl;
 
@@ -11,7 +11,11 @@ int Menu::Menu_function::display() const {
 
     while (true) {
       std::cout << "Choose an option: ";
-      if (std::cin >> choice && choice < items.size()) {
+      if (std::cin >> choice && choice >= -1 && choice < (int)items.size()) {
+        if (choice == -1) {
+          std::cout << "Back" << items[choice].prompt << "\n";
+          return 1;
+        }
         std::cout << "Chosen: " << items[choice].prompt << "\n\n";
         int res = menu.get_callback(items[choice].callback)();
         if (--res) return res;
