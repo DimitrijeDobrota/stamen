@@ -1,5 +1,4 @@
 add_library(menu
-    menu.cpp
     display.cpp
 )
 
@@ -7,10 +6,7 @@ target_include_directories(menu
     PUBLIC ../include
 )
 
-
-add_executable(demo
-    main.cpp
-)
+add_executable(demo main.cpp)
 
 target_link_libraries(demo
     PRIVATE menu

@@ -1,24 +1,30 @@
 #include "menu.h"
+#include <cmath>
+#include <format>
 #include <iostream>
 
-int Menu::Menu_function::display() const {
+int Menu::function_t::display() const {
   int choice;
-  while (true) {
-    std::cout << name << std::endl;
 
-    for (auto i = 0ul; i < items.size(); i++)
-      std::cout << i << ". " << items[i].prompt << std::endl;
+  const int n = items.size(), digits = std::log10(n) + 1;
+  while (true) {
+    std::cout << std::format("{}:\n", name);
+    for (auto i = 0ul; i < n; i++) {
+      std::cout << std::format(" {:{}}. {}\n", i, digits, items[i].prompt);
+    }
 
     while (true) {
       std::cout << "Choose an option: ";
-      if (std::cin >> choice && choice >= -1 && choice < (int)items.size()) {
+      if (std::cin >> choice && choice >= -1 && choice < n) {
         if (choice == -1) {
-          std::cout << "Back" << items[choice].prompt << "\n";
+          std::cout << "choice: back\n";
           return 1;
         }
-        std::cout << "Chosen: " << items[choice].prompt << "\n\n";
+
+        std::cout << std::format("Choice: {}\n\n", items[choice].prompt);
         int res = menu.get_callback(items[choice].callback)();
         if (--res) return res;
+
         break;
       } else if (std::cin.eof()) {
         std::cerr << "encountered end of input!\n";
@@ -27,7 +33,7 @@ int Menu::Menu_function::display() const {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
       }
-      std::cout << "Invalid option, please choose again!" << std::endl;
+      std::cout << "Invalid option, please choose again!\n";
     }
     std::cout << std::endl;
   }
