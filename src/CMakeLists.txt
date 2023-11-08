@@ -17,3 +17,15 @@ set_target_properties(demo PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR}
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+
+add_executable(generate generate.cpp)
+
+target_include_directories(generate
+    PUBLIC ../include
+)
+
+set_target_properties(generate PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)

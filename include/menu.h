@@ -35,6 +35,7 @@ public:
     }
   }
 
+  void print(const std::string code = "main", const int depth = 1) const;
   void operator()() const { get_callback("main")(); }
 
   struct record_t {
@@ -60,6 +61,7 @@ private:
   };
 
   struct function_t {
+    friend class Menu;
     function_t(const Menu &m, const std::string &n,
                const std::vector<item_t> &i)
         : menu(m), name(n), items(i) {}

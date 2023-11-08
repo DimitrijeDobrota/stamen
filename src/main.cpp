@@ -25,6 +25,7 @@ int main(void) {
       {  "settings",   settings},
       {    "finish",     finish}
   });
-  menu();
+  // menu();
+  menu.print();
   return 0;
 }

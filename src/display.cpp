@@ -40,3 +40,21 @@ int Menu::function_t::display() const {
 
   return 1;
 }
+
+void Menu::print(const std::string code, const int depth) const {
+  const auto it = lookup.find(code);
+  if (it == lookup.end()) return;
+  const callback_t &cb = it->second;
+
+  if (depth == 1) {
+    std::cout << std::format("{}({})\n", cb.menu_func->name, code);
+  }
+
+  if (cb.menu_func) {
+    for (const auto &item : cb.menu_func->items) {
+      std::cout << std::format("{}{}({})\n", std::string(depth << 1, ' '),
+                               item.prompt, item.callback);
+      if (cb.menu_func) cb.menu_func->menu.print(item.callback, depth + 1);
+    }
+  }
+}
