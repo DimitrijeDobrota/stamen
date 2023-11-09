@@ -1,5 +1,5 @@
 add_library(menu
-    display.cpp
+    menu.cpp
 )
 
 target_include_directories(menu

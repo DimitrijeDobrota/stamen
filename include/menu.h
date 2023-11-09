@@ -10,45 +10,15 @@
 
 using json = nlohmann::json;
 
-class EMenu_callback : std::exception {
-  virtual const char *what() const noexcept override {
-    return "Unknown callback function or menu method";
-  }
-};
-
-class EMenu_call : std::exception {
-  virtual const char *what() const noexcept override {
-    return "Trying a callback that doesn't exist";
-  }
-};
-
 class Menu {
 public:
   typedef int (*callback_f)(void);
 
-  Menu(const std::string &s) {
-    for (const auto &menu : json::parse(std::fstream(s))) {
-      const json &items = menu["items"];
-      const function_t *mf =
-          new function_t(*this, menu["name"], {items.begin(), items.end()});
-      lookup.insert({menu["code"], callback_t(mf)});
+  class EMenu : std::exception {
+    virtual const char *what() const noexcept override {
+      return "Trying to access an unknown menu";
     }
-  }
-
-  void print(const std::string code = "main", const int depth = 1) const;
-  void operator()() const { get_callback("main")(); }
-
-  struct record_t {
-    const std::string code;
-    const callback_f callback;
   };
-
-  void insert(const record_t &record) {
-    lookup.insert({record.code, record.callback});
-  }
-  void insert(const std::vector<record_t> &records) {
-    for (const auto &record : records) { insert(record); }
-  }
 
 private:
   struct item_t {
@@ -60,40 +30,40 @@ private:
     item_t(const json &j) : item_t(j["prompt"], j["callback"]) {}
   };
 
-  struct function_t {
-    friend class Menu;
-    function_t(const Menu &m, const std::string &n,
-               const std::vector<item_t> &i)
-        : menu(m), name(n), items(i) {}
+  Menu(const json &json_data)
+      : name(json_data["name"]), code(json_data["code"]),
+        items({json_data["items"].begin(), json_data["items"].end()}) {}
 
-    int display() const;
+  Menu(const std::string code, const callback_f callback)
+      : name(code), code(code), items(), callback(callback) {}
 
-  private:
-    const Menu &menu;
-    const std::string name;
-    const std::vector<item_t> items;
-  };
-
-  struct callback_t {
-    const function_t *menu_func = nullptr;
-    const callback_f func = nullptr;
-
-    callback_t(const callback_f f) : func(f) {}
-    callback_t(const function_t *f) : menu_func(f) {}
-
-    int operator()() const {
-      if (!func && !menu_func) throw EMenu_callback();
-      return func ? func() : menu_func->display();
+public:
+  static void read(const std::string &s) {
+    for (const auto &json_data : json::parse(std::fstream(s))) {
+      lookup.insert({json_data["code"], Menu(json_data)});
     }
-  };
+  }
 
-  const callback_t &get_callback(const std::string &s) const {
-    const auto it = lookup.find(s);
-    if (it == lookup.end()) throw EMenu_call();
+  static int start() { return getMenu("main")(); }
+  static void insert(const std::string code, const callback_f callback) {
+    lookup.insert({code, Menu(code, callback)});
+  }
+
+  static void print(const std::string code = "main", const int depth = 1);
+  int operator()() const;
+
+private:
+  static std::unordered_map<std::string, Menu> lookup;
+
+  static const Menu &getMenu(const std::string &code) {
+    const auto it = lookup.find(code);
+    if (it == lookup.end()) throw EMenu();
     return it->second;
   }
 
-  std::unordered_map<std::string, callback_t> lookup;
+  const std::string name, code;
+  const std::vector<item_t> items;
+  const callback_f callback = nullptr;
 };
 
 #endif

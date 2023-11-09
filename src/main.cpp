@@ -19,13 +19,13 @@ int finish(void) {
 }
 
 int main(void) {
-  Menu menu("menu.json");
-  menu.insert({
-      {"algorithms", algorithms},
-      {  "settings",   settings},
-      {    "finish",     finish}
-  });
-  // menu();
-  menu.print();
+  Menu::read("menu.json");
+  Menu::insert("algorithms", algorithms);
+  Menu::insert("settings", settings);
+  Menu::insert("finish", finish);
+
+  Menu::print("main");
+  Menu::start();
+
   return 0;
 }
