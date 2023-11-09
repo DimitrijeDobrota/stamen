@@ -20,16 +20,36 @@ public:
     }
   };
 
-private:
   struct item_t {
-    const std::string prompt;
-    const std::string callback;
+    const std::string prompt, callback;
+    const callback_f func;
 
-    item_t(const std::string &p, const std::string &c)
-        : prompt(p), callback(c) {}
+    item_t(const std::string &p, const std::string &c,
+           const callback_f func = nullptr)
+        : prompt(p), callback(c), func(func) {}
     item_t(const json &j) : item_t(j["prompt"], j["callback"]) {}
   };
 
+  static void read(const std::string &s) {
+    for (const auto &json_data : json::parse(std::fstream(s))) {
+      lookup.insert({json_data["code"], Menu(json_data)});
+    }
+  }
+
+  static int start() { return getMenu(entry)(); }
+  static void insert(const std::string code, const callback_f callback) {
+    lookup.insert({code, Menu(code, callback)});
+  }
+
+  static void print(const std::string &code = entry, const int depth = 1);
+  static void generate(const std::string &code = entry);
+  static int display(const std::string &name, const item_t items[], int size);
+
+  int operator()() const {
+    return callback ? callback() : display(name, items.data(), items.size());
+  }
+
+private:
   Menu(const json &json_data)
       : name(json_data["name"]), code(json_data["code"]),
         items({json_data["items"].begin(), json_data["items"].end()}) {}
@@ -37,23 +57,8 @@ private:
   Menu(const std::string code, const callback_f callback)
       : name(code), code(code), items(), callback(callback) {}
 
-public:
-  static void read(const std::string &s) {
-    for (const auto &json_data : json::parse(std::fstream(s))) {
-      lookup.insert({json_data["code"], Menu(json_data)});
-    }
-  }
-
-  static int start() { return getMenu("main")(); }
-  static void insert(const std::string code, const callback_f callback) {
-    lookup.insert({code, Menu(code, callback)});
-  }
-
-  static void print(const std::string code = "main", const int depth = 1);
-  int operator()() const;
-
-private:
   static std::unordered_map<std::string, Menu> lookup;
+  static const std::string entry;
 
   static const Menu &getMenu(const std::string &code) {
     const auto it = lookup.find(code);

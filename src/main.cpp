@@ -18,14 +18,16 @@ int finish(void) {
   exit(0);
 }
 
+int foo(void) { exit(1); }
+
 int main(void) {
   Menu::read("menu.json");
-  Menu::insert("algorithms", algorithms);
-  Menu::insert("settings", settings);
-  Menu::insert("finish", finish);
-
-  Menu::print("main");
-  Menu::start();
+  // Menu::insert("algorithms", algorithms);
+  // Menu::insert("settings", settings);
+  // Menu::insert("finish", finish);
+  Menu::generate();
+  // Menu::print();
+  // Menu::start();
 
   return 0;
 }
