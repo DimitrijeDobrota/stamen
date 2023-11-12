@@ -20,6 +20,10 @@ set_target_properties(demo PROPERTIES
 
 add_executable(generate generate.cpp)
 
+target_link_libraries(generate
+    PRIVATE menu
+)
+
 target_include_directories(generate
     PUBLIC ../include
 )
