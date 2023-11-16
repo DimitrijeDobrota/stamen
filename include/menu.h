@@ -13,13 +13,19 @@
 #include <vector>
 
 class Menu {
-  // Menu(const Menu &) = delete;
-  // Menu &operator=(const Menu &) = delete;
+  Menu(const Menu &) = delete;
+  Menu &operator=(const Menu &) = delete;
 
-  friend class std::allocator<std::pair<const std::string, Menu>>;
+  struct private_ctor_t {};
 
 public:
   typedef int (*callback_f)(void);
+
+  Menu(private_ctor_t, const std::string &code, const std::string &prompt)
+      : Menu(code, prompt) {}
+
+  Menu(private_ctor_t, const std::string &code, const callback_f callback)
+      : Menu(code, callback) {}
 
   class EMenu : std::exception {
     virtual const char *what() const noexcept override {
@@ -57,10 +63,9 @@ public:
       ss >> delim >> code;
       ss.ignore(1, ' '), std::getline(ss, prompt);
       if (delim == "+") {
-        // const auto [iter, succ] = lookup.emplace(
-        //     std::piecewise_construct, std::forward_as_tuple(code),
-        //     std::forward_as_tuple(code, prompt));
-        const auto [iter, succ] = lookup.insert({code, Menu(code, prompt)});
+        const auto [iter, succ] = lookup.emplace(
+            std::piecewise_construct, std::forward_as_tuple(code),
+            std::forward_as_tuple(private_ctor_t{}, code, prompt));
         last = iter;
       } else {
         last->second.items.push_back({code, prompt});
@@ -70,9 +75,8 @@ public:
 
   static int start(const std::string &entry) { return getMenu(entry)(); }
   static void insert(const std::string &code, const callback_f callback) {
-    // lookup.emplace(std::piecewise_construct, std::forward_as_tuple(code),
-    //                std::forward_as_tuple(code, callback));
-    lookup.insert({code, Menu(code, callback)});
+    lookup.emplace(std::piecewise_construct, std::forward_as_tuple(code),
+                   std::forward_as_tuple(private_ctor_t{}, code, callback));
   }
 
   static void print(const std::string &entry) { print(entry, 1); }
