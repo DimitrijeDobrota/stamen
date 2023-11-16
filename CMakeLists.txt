@@ -3,7 +3,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
     Menu
-    VERSION 0.0.4
+    VERSION 0.0.5
     DESCRIPTION "Experimentation with dinamic menus"
     LANGUAGES CXX
 )
@@ -13,3 +13,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory(src)
+add_subdirectory(demo)

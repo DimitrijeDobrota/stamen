@@ -1,16 +1,23 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "json.hpp"
 #include <exception>
+#include <format>
 #include <fstream>
+#include <iostream>
+#include <memory>
+#include <sstream>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
-using json = nlohmann::json;
-
 class Menu {
+  // Menu(const Menu &) = delete;
+  // Menu &operator=(const Menu &) = delete;
+
+  friend class std::allocator<std::pair<const std::string, Menu>>;
+
 public:
   typedef int (*callback_f)(void);
 
@@ -21,43 +28,70 @@ public:
   };
 
   struct item_t {
-    const std::string prompt, callback;
-    const callback_f func;
+    const std::string prompt, code;
+    callback_f callback = nullptr;
 
-    item_t(const std::string &p, const std::string &c,
-           const callback_f func = nullptr)
-        : prompt(p), callback(c), func(func) {}
-    item_t(const json &j) : item_t(j["prompt"], j["callback"]) {}
+    item_t(const std::string &code, const std::string &prompt)
+        : code(code), prompt(prompt) {}
+
+    item_t(const callback_f func, const std::string &prompt)
+        : callback(func), prompt(prompt) {}
+
+    int operator()(void) const {
+      return callback ? callback() : getMenu(code)();
+    }
   };
 
   static void read(const std::string &s) {
-    for (const auto &json_data : json::parse(std::fstream(s))) {
-      lookup.insert({json_data["code"], Menu(json_data)});
+    std::string line, delim, code, prompt;
+    std::fstream fs(s);
+    char tmp;
+
+    lookup_t::iterator last = lookup.end();
+    while (std::getline(fs, line)) {
+      if (line.empty()) continue;
+      std::istringstream ss(line);
+      ss >> delim >> code;
+      ss.ignore(1, ' '), std::getline(ss, prompt);
+      if (delim == "+") {
+        // const auto [iter, succ] = lookup.emplace(
+        //     std::piecewise_construct, std::forward_as_tuple(code),
+        //     std::forward_as_tuple(code, prompt));
+        const auto [iter, succ] = lookup.insert({code, Menu(code, prompt)});
+        last = iter;
+      } else {
+        last->second.items.push_back({code, prompt});
+      }
     }
   }
 
   static int start() { return getMenu(entry)(); }
-  static void insert(const std::string code, const callback_f callback) {
+  static void insert(const std::string &code, const callback_f callback) {
+    // lookup.emplace(std::piecewise_construct, std::forward_as_tuple(code),
+    //                std::forward_as_tuple(code, callback));
     lookup.insert({code, Menu(code, callback)});
   }
 
   static void print(const std::string &code = entry, const int depth = 1);
-  static void generate(const std::string &code = entry);
+
+  static void generateSource(std::ostream &os);
+  static void generateInclude(std::ostream &os);
+
   static int display(const std::string &name, const item_t items[], int size);
 
   int operator()() const {
-    return callback ? callback() : display(name, items.data(), items.size());
+    return callback ? callback() : display(title, items.data(), items.size());
   }
 
 private:
-  Menu(const json &json_data)
-      : name(json_data["name"]), code(json_data["code"]),
-        items({json_data["items"].begin(), json_data["items"].end()}) {}
+  Menu(const std::string &code, const std::string &prompt)
+      : code(code), title(prompt) {}
 
-  Menu(const std::string code, const callback_f callback)
-      : name(code), code(code), items(), callback(callback) {}
+  Menu(const std::string &code, const callback_f callback)
+      : code(code), title(code), callback(callback) {}
 
-  static std::unordered_map<std::string, Menu> lookup;
+  typedef std::unordered_map<std::string, Menu> lookup_t;
+  static lookup_t lookup;
   static const std::string entry;
 
   static const Menu &getMenu(const std::string &code) {
@@ -66,9 +100,9 @@ private:
     return it->second;
   }
 
-  const std::string name, code;
-  const std::vector<item_t> items;
+  const std::string code, title;
   const callback_f callback = nullptr;
+  std::vector<item_t> items;
 };
 
 #endif
