@@ -2,6 +2,8 @@
 
 #include "demo_menu.h"
 
+const Menu::display_f Menu::display = Menu::builtinDisplay;
+
 int operation(void) {
   std::cout << "operation" << std::endl;
   std::cout << "Some operation is done" << std::endl;
@@ -14,10 +16,10 @@ int finish(void) {
 }
 
 int menu_static_run(void) { return menu::menu_main(); }
-int menu_dynamic_run(void) { return Menu::start(); }
+int menu_dynamic_run(void) { return Menu::start("menu_main"); }
 
 int menu_dynamic_print(void) {
-  Menu::print();
+  Menu::print("menu_main");
   return 1;
 }
 

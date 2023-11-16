@@ -28,18 +28,21 @@ public:
   };
 
   struct item_t {
-    const std::string prompt, code;
-    callback_f callback = nullptr;
-
-    item_t(const std::string &code, const std::string &prompt)
-        : code(code), prompt(prompt) {}
+    friend class Menu;
 
     item_t(const callback_f func, const std::string &prompt)
         : callback(func), prompt(prompt) {}
 
+  private:
     int operator()(void) const {
       return callback ? callback() : getMenu(code)();
     }
+
+    item_t(const std::string &code, const std::string &prompt)
+        : code(code), prompt(prompt) {}
+
+    const std::string prompt, code;
+    callback_f callback = nullptr;
   };
 
   static void read(const std::string &s) {
@@ -65,19 +68,23 @@ public:
     }
   }
 
-  static int start() { return getMenu(entry)(); }
+  static int start(const std::string &entry) { return getMenu(entry)(); }
   static void insert(const std::string &code, const callback_f callback) {
     // lookup.emplace(std::piecewise_construct, std::forward_as_tuple(code),
     //                std::forward_as_tuple(code, callback));
     lookup.insert({code, Menu(code, callback)});
   }
 
-  static void print(const std::string &code = entry, const int depth = 1);
+  static void print(const std::string &entry) { print(entry, 1); }
 
   static void generateSource(std::ostream &os);
   static void generateInclude(std::ostream &os);
 
-  static int display(const std::string &name, const item_t items[], int size);
+  typedef int (*display_f)(const std::string &name, const item_t items[],
+                           std::size_t size);
+  static const display_f display;
+  static int builtinDisplay(const std::string &name, const item_t items[],
+                            std::size_t size);
 
   int operator()() const {
     return callback ? callback() : display(title, items.data(), items.size());
@@ -92,8 +99,8 @@ private:
 
   typedef std::unordered_map<std::string, Menu> lookup_t;
   static lookup_t lookup;
-  static const std::string entry;
 
+  static void print(const std::string &entry, const int depth);
   static const Menu &getMenu(const std::string &code) {
     const auto it = lookup.find(code);
     if (it == lookup.end()) throw EMenu();

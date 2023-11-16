@@ -1,2 +1,4 @@
 build
 .cache
+demo/demo_menu.cpp
+demo/demo_menu.h

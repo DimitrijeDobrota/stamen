@@ -1,6 +1,8 @@
 #include "menu.h"
 #include <string>
 
+const Menu::display_f Menu::display = Menu::builtinDisplay;
+
 int main(const int argc, const char *argv[]) {
   if (argc != 2) {
     std::cout << "please enter at exaclty one config file" << std::endl;

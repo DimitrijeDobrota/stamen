@@ -8,9 +8,9 @@
 #include <unordered_set>
 
 std::unordered_map<std::string, Menu> Menu::lookup;
-const std::string Menu::entry = "menu_main";
 
-int Menu::display(const std::string &name, const item_t items[], int size) {
+int Menu::builtinDisplay(const std::string &name, const item_t items[],
+                         std::size_t size) {
   int choice;
   const int digits = std::log10(size) + 1;
   while (true) {
@@ -23,7 +23,7 @@ int Menu::display(const std::string &name, const item_t items[], int size) {
       std::cout << "Choose an option: ";
       if (std::cin >> choice && choice >= -1 && choice < size) {
         if (choice == -1) {
-          std::cout << "choice: back\n";
+          std::cout << "Choice: back\n";
           return 1;
         }
 
@@ -47,6 +47,7 @@ int Menu::display(const std::string &name, const item_t items[], int size) {
 
   return 1;
 }
+
 void Menu::generateInclude(std::ostream &os) {
   os << "#include \"menu.h\"\n\n";
   os << "namespace menu {\n\n";
@@ -85,7 +86,7 @@ void Menu::print(const std::string &code, const int depth) {
   if (it == lookup.end()) return;
   const Menu &menu = it->second;
 
-  if (depth == 1) { std::cout << std::format("{}({})\n", menu.title, code); }
+  if (depth == 1) std::cout << std::format("{}({})\n", menu.title, code);
 
   if (!menu.callback) {
     for (const auto &item : menu.items) {

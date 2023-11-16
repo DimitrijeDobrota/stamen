@@ -3,7 +3,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
     Menu
-    VERSION 0.0.5
+    VERSION 0.0.6
     DESCRIPTION "Experimentation with dinamic menus"
     LANGUAGES CXX
 )
