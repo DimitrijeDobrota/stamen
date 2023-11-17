@@ -5,22 +5,21 @@ add_executable(demo
 
 target_link_libraries(demo
     stamen
-    stamen-display
 )
 
-ADD_CUSTOM_COMMAND(
+add_custom_command(
     OUTPUT demo_menu.h demo_menu.cpp
     COMMAND ${CMAKE_BINARY_DIR}/bin/stamen-generate ${CMAKE_CURRENT_SOURCE_DIR}/demo_menu.conf
     DEPENDS demo_menu.conf stamen-generate
     COMMENT "Generating menu files"
 )
 
-ADD_CUSTOM_TARGET(GenerateMenu
+add_custom_target(GenerateMenu
     DEPENDS demo_menu.h demo_menu.cpp
     COMMENT "Check if re-generation of menu files is required"
 )
 
-ADD_DEPENDENCIES(demo GenerateMenu)
+add_dependencies(demo GenerateMenu)
 
 set_target_properties(demo PROPERTIES
     VERSION ${PROJECT_VERSION}
@@ -28,4 +27,4 @@ set_target_properties(demo PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-CONFIGURE_FILE(demo_menu.conf ${CMAKE_BINARY_DIR}/bin/demo_menu.conf  COPYONLY)
+configure_file(demo_menu.conf ${CMAKE_BINARY_DIR}/bin/demo_menu.conf COPYONLY)

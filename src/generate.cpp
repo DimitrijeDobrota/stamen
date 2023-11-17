@@ -5,7 +5,7 @@ using namespace stamen;
 
 int main(const int argc, const char *argv[]) {
   if (argc != 2) {
-    std::cout << "please enter at exaclty one config file" << std::endl;
+    std::cout << "please enter exaclty one config file" << std::endl;
     return 1;
   }
 
