@@ -1,7 +1,7 @@
 #include "stamen.h"
 #include <string>
 
-const Menu::display_f Menu::display = Menu::builtinDisplay;
+using namespace stamen;
 
 int main(const int argc, const char *argv[]) {
   if (argc != 2) {

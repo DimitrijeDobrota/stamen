@@ -5,6 +5,7 @@ add_executable(demo
 
 target_link_libraries(demo
     stamen
+    stamen-display
 )
 
 ADD_CUSTOM_COMMAND(

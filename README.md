@@ -68,13 +68,15 @@ Please reference demo folder for relevant usage example.
 
 There are a few things needed before you begin.
 
+* Everything is contained in the `stamen namespace`
 * Panel and item codes must be one word. In addition they must be valid C++
 function names if static menu is to be build correctly.
 * Each free function must have `int name(void)` signature as prescribed by
 `Menu::callback_f`.
 * You must set a value of the static variable `const Menu::display_f
 Menu::display` to specify function used for displaying the menu. You can start
-by using a build in `Menu::builtinDisplay`.
+by using a build in `stamen::builtinDisplay`, just make sure to link stamen library
+while building your project.
 
 
 #### Dynamic menu
@@ -84,6 +86,9 @@ order to invoke the menu you need to add the following code to your C++
 program:
 
 ```
+// shorthand
+using stamen::Menu;
+
 // read the configuration
 Menu::read("path to config");
 
@@ -118,6 +123,9 @@ menu starting from that specific pane.
 
 #### Custom display function
 
+Please refer to the implementation of `stamen::builtinDisplay` to get a general
+idea of the direction.
+
 A display function should have `int name(const std::string&, const
 Menu::item_t[], std::size_t)` signature as prescribed by `Menu::display_f`. To
 get information about the specific item use `getPrompt()` and `getCallback()`
@@ -128,9 +136,6 @@ After prompting user to select one of the items all you have to do is call
 return type of int is intended to be used as a measure how many panels back
 should be backtracked after a free function terminates, but you can use in any
 way you see fit.
-
-Please refer to the implementation of `Menu::builtinDisplay` to get a general
-idea of the direction.
 
 
 ## Version History

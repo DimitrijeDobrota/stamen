@@ -1,9 +1,15 @@
-add_library(stamen
+add_library(stamen INTERFACE)
+
+target_include_directories(stamen
+    INTERFACE ../include
+)
+
+add_library(stamen-display
     stamen.cpp
 )
 
-target_include_directories(stamen
-    PUBLIC ../include
+target_link_libraries(stamen-display
+    PRIVATE stamen
 )
 
 add_executable(stamen-generate generate.cpp)
