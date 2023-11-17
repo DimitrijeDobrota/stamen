@@ -39,16 +39,19 @@ public:
     item_t(const callback_f func, const std::string &prompt)
         : callback(func), prompt(prompt) {}
 
-  private:
+    const std::string getPrompt(void) const { return prompt; }
+    const callback_f getCallback(void) const { return callback; }
+
     int operator()(void) const {
       return callback ? callback() : getMenu(code)();
     }
 
+  private:
     item_t(const std::string &code, const std::string &prompt)
         : code(code), prompt(prompt) {}
 
     const std::string prompt, code;
-    callback_f callback = nullptr;
+    const callback_f callback = nullptr;
   };
 
   static void read(const std::string &s) {
@@ -84,10 +87,9 @@ public:
   static void generateSource(std::ostream &os);
   static void generateInclude(std::ostream &os);
 
-  typedef int (*display_f)(const std::string &name, const item_t items[],
-                           std::size_t size);
+  typedef int (*display_f)(const std::string &, const item_t[], std::size_t);
   static const display_f display;
-  static int builtinDisplay(const std::string &name, const item_t items[],
+  static int builtinDisplay(const std::string &title, const item_t items[],
                             std::size_t size);
 
   int operator()() const {
@@ -105,6 +107,7 @@ private:
   static lookup_t lookup;
 
   static void print(const std::string &entry, const int depth);
+
   static const Menu &getMenu(const std::string &code) {
     const auto it = lookup.find(code);
     if (it == lookup.end()) throw EMenu();

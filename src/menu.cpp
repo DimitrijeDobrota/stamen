@@ -9,14 +9,14 @@
 
 std::unordered_map<std::string, Menu> Menu::lookup;
 
-int Menu::builtinDisplay(const std::string &name, const item_t items[],
+int Menu::builtinDisplay(const std::string &title, const item_t items[],
                          std::size_t size) {
   int choice;
   const int digits = std::log10(size) + 1;
   while (true) {
-    std::cout << std::format("{}:\n", name);
+    std::cout << std::format("{}:\n", title);
     for (auto i = 0ul; i < size; i++) {
-      std::cout << std::format(" {:{}}. {}\n", i, digits, items[i].prompt);
+      std::cout << std::format(" {:{}}. {}\n", i, digits, items[i].getPrompt());
     }
 
     while (true) {
@@ -28,7 +28,7 @@ int Menu::builtinDisplay(const std::string &name, const item_t items[],
         }
 
         const item_t &chosen = items[choice];
-        std::cout << std::format("Choice: {}\n\n", chosen.prompt);
+        std::cout << std::format("Choice: {}\n\n", chosen.getPrompt());
         const int res = chosen();
         if (res > 1) return res - 1;
 

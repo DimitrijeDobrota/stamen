@@ -4,9 +4,21 @@
 
 const Menu::display_f Menu::display = Menu::builtinDisplay;
 
-int operation(void) {
-  std::cout << "operation" << std::endl;
+int operation1(void) {
+  std::cout << "operation 1" << std::endl;
   std::cout << "Some operation is done" << std::endl;
+  return 1;
+}
+
+int operation2(void) {
+  std::cout << "operation 2" << std::endl;
+  std::cout << "Some other operation is done" << std::endl;
+  return 1;
+}
+
+int operation3(void) {
+  std::cout << "operation 3" << std::endl;
+  std::cout << "Yet another operation is done" << std::endl;
   return 1;
 }
 
@@ -30,7 +42,9 @@ int main(int argc, const char *argv[]) {
 
   Menu::read(base + "/demo_menu.conf");
   Menu::insert("finish", finish);
-  Menu::insert("operation", operation);
+  Menu::insert("operation1", operation1);
+  Menu::insert("operation2", operation2);
+  Menu::insert("operation3", operation3);
 
   static const Menu::item_t items[] = {
       {   menu_static_run, "Run statically generated menu"},
