@@ -1,5 +1,5 @@
-#ifndef MENU_H
-#define MENU_H
+#ifndef STAMEN_H
+#define STAMEN_H
 
 #include <exception>
 #include <format>

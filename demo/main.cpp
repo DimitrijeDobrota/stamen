@@ -27,7 +27,7 @@ int finish(void) {
   exit(0);
 }
 
-int menu_static_run(void) { return menu::menu_main(); }
+int menu_static_run(void) { return stamen::menu_main(); }
 int menu_dynamic_run(void) { return Menu::start("menu_main"); }
 
 int menu_dynamic_print(void) {

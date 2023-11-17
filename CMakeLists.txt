@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.25.2)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
-    Menu
-    VERSION 0.0.7
-    DESCRIPTION "Experimentation with dinamic menus"
+    Stamen
+    VERSION 0.0.8
+    DESCRIPTION "Static menu generator"
     LANGUAGES CXX
 )
 

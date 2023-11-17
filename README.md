@@ -107,7 +107,7 @@ will create source file and include file in the current directory with the name
 as the configuration file but with extensions `.cpp` and `.h` respectively.
 
 Include file will contain declarations for all of the menu functions inside
-`menu` namespace. You should include this file in your code.
+`stamen` namespace. You should include this file in your code.
 
 Source file contains definitions for the menu functions. It also includes
 `shared.h` file which should contain declarations for all of the free functions

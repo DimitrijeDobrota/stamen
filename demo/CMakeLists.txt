@@ -4,13 +4,13 @@ add_executable(demo
 )
 
 target_link_libraries(demo
-    menu
+    stamen
 )
 
 ADD_CUSTOM_COMMAND(
     OUTPUT demo_menu.h demo_menu.cpp
-    COMMAND ${CMAKE_BINARY_DIR}/bin/generate ${CMAKE_CURRENT_SOURCE_DIR}/demo_menu.conf
-    DEPENDS demo_menu.conf generate
+    COMMAND ${CMAKE_BINARY_DIR}/bin/stamen-generate ${CMAKE_CURRENT_SOURCE_DIR}/demo_menu.conf
+    DEPENDS demo_menu.conf stamen-generate
     COMMENT "Generating menu files"
 )
 

@@ -1,4 +1,4 @@
-#include "menu.h"
+#include "stamen.h"
 #include <string>
 
 const Menu::display_f Menu::display = Menu::builtinDisplay;

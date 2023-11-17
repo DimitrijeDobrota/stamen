@@ -1,4 +1,4 @@
-#include "../include/menu.h"
+#include "../include/stamen.h"
 #include <cmath>
 #include <format>
 #include <fstream>
@@ -21,7 +21,7 @@ int Menu::builtinDisplay(const std::string &title, const item_t items[],
 
     while (true) {
       std::cout << "Choose an option: ";
-      if (std::cin >> choice && choice >= -1 && choice < size) {
+      if (std::cin >> choice && choice >= -1 && choice < (int)size) {
         if (choice == -1) {
           std::cout << "Choice: back\n";
           return 1;
@@ -49,20 +49,23 @@ int Menu::builtinDisplay(const std::string &title, const item_t items[],
 }
 
 void Menu::generateInclude(std::ostream &os) {
-  os << "#include \"menu.h\"\n\n";
-  os << "namespace menu {\n\n";
+  os << "#ifndef STAMEN_MENU_H\n";
+  os << "#define STAMEN_MENU_H\n\n";
+  os << "#include <stamen.h>\n\n";
+  os << "namespace stamen {\n\n";
   for (const auto &[code, _] : lookup) {
     const Menu &menu = getMenu(code);
     if (menu.callback) continue;
     os << std::format("int {}(void);\n", menu.code);
   }
   os << "\n}\n";
+  os << "#endif\n";
 }
 
 void Menu::generateSource(std::ostream &os) {
-  os << "#include \"menu.h\"\n";
+  os << "#include <stamen.h>\n";
   os << "#include \"shared.h\"\n";
-  os << "\nnamespace menu {\n";
+  os << "\nnamespace stamen {\n";
   for (const auto &[code, _] : lookup) {
     const Menu &menu = getMenu(code);
     if (menu.callback) continue;
