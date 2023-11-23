@@ -15,6 +15,7 @@ namespace stamen {
 
 class Menu {
 public:
+  friend class Generator;
   typedef int (*callback_f)(void);
 
   Menu(const Menu &) = delete;
@@ -22,35 +23,27 @@ public:
 
   struct private_ctor_t {};
 
+  // Tag type dispatch
   Menu(private_ctor_t, const std::string &code, const std::string &prompt)
       : Menu(code, prompt) {}
 
   Menu(private_ctor_t, const std::string &code, const callback_f callback)
       : Menu(code, callback) {}
 
-  class EMenu : std::exception {
-    virtual const char *what() const noexcept override {
-      return "Trying to access an unknown menu";
-    }
-  };
-
   struct item_t {
-    friend class Menu;
-
     item_t(const callback_f func, const std::string &prompt)
         : callback(func), prompt(prompt) {}
 
-    const std::string getPrompt(void) const { return prompt; }
-    const callback_f getCallback(void) const { return callback; }
-
-    int operator()(void) const {
-      return callback ? callback() : getMenu(code)();
-    }
-
-  private:
     item_t(const std::string &code, const std::string &prompt)
         : code(code), prompt(prompt) {}
 
+    const std::string getCode(void) const { return code; }
+    const std::string getPrompt(void) const { return prompt; }
+    const callback_f getCallback(void) const { return callback; }
+
+    int operator()(void) const { return callback ? callback() : start(code); }
+
+  private:
     const std::string prompt, code;
     const callback_f callback = nullptr;
   };
@@ -61,11 +54,12 @@ public:
   static void read(const std::string &s);
   static void insert(const std::string &code, const callback_f callback);
 
-  static int start(const std::string &entry) { return getMenu(entry)(); }
   static void print(const std::string &entry) { print(entry, 1); }
-
-  static void generateSource(std::ostream &os);
-  static void generateInclude(std::ostream &os);
+  static int start(const std::string &entry) {
+    const Menu *menu = getMenu(entry);
+    if (!menu) return 1;
+    return menu->operator()();
+  }
 
   int operator()() const {
     return callback ? callback() : display(title, items.data(), items.size());
@@ -86,11 +80,11 @@ private:
 
   static void print(const std::string &entry, const int depth);
 
-  static const Menu &getMenu(const std::string &code) {
+  static const Menu *getMenu(const std::string &code) {
     static lookup_t &lookup = getLookup();
     const auto it = lookup.find(code);
-    if (it == lookup.end()) throw EMenu();
-    return it->second;
+    if (it == lookup.end()) return nullptr;
+    return &it->second;
   }
 
   const std::string code, title;
@@ -126,55 +120,17 @@ inline void Menu::insert(const std::string &code, const callback_f callback) {
                       std::forward_as_tuple(private_ctor_t{}, code, callback));
 }
 
-inline void Menu::generateInclude(std::ostream &os) {
-  os << "#ifndef STAMEN_MENU_H\n";
-  os << "#define STAMEN_MENU_H\n\n";
-  os << "#include <stamen.h>\n\n";
-  os << "namespace stamen {\n\n";
-  for (const auto &[code, _] : getLookup()) {
-    const Menu &menu = getMenu(code);
-    if (menu.callback) continue;
-    os << std::format("int {}(void);\n", menu.code);
-  }
-  os << "\n}\n";
-  os << "#endif\n";
-}
-
-inline void Menu::generateSource(std::ostream &os) {
-  os << "#include <stamen.h>\n";
-  os << "#include \"shared.h\"\n";
-  os << "\nnamespace stamen {\n";
-  for (const auto &[code, _] : getLookup()) {
-    const Menu &menu = getMenu(code);
-    if (menu.callback) continue;
-
-    os << std::format("int {}(void) {{\n", menu.code);
-    os << std::format("\tstatic const Menu::item_t items[] = {{\n");
-    for (const auto &item : menu.items) {
-      os << std::format("\t\t{{{}, \"{}\"}},\n", item.code, item.prompt);
-    }
-    os << std::format("\t}};\n");
-    os << std::format("\treturn Menu::display(\"{}\", items, "
-                      "sizeof(items) / sizeof(Menu::item_t));\n",
-                      menu.title);
-    os << std::format("}}\n\n");
-  }
-  os << "\n}\n";
-}
-
 inline void Menu::print(const std::string &code, const int depth) {
-  static lookup_t &lookup = getLookup();
-  const auto it = lookup.find(code);
-  if (it == lookup.end()) return;
-  const Menu &menu = it->second;
+  const Menu *menu = getMenu(code);
+  if (!menu) return;
 
-  if (depth == 1) std::cout << std::format("{}({})\n", menu.title, code);
+  if (depth == 1) std::cout << std::format("{}({})\n", menu->title, code);
 
-  if (!menu.callback) {
-    for (const auto &item : menu.items) {
+  if (!menu->callback) {
+    for (const auto &item : menu->items) {
       std::cout << std::format("{}{} ({})\n", std::string(depth << 1, ' '),
-                               item.prompt, item.code);
-      menu.print(item.code, depth + 1);
+                               item.getPrompt(), item.getCode());
+      menu->print(item.getCode(), depth + 1);
     }
   }
 }
