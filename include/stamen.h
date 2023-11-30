@@ -1,6 +1,8 @@
 #ifndef STAMEN_H
 #define STAMEN_H
 
+#include "stamenc.h"
+
 #include <exception>
 #include <format>
 #include <fstream>
@@ -31,6 +33,7 @@ public:
       : Menu(code, callback) {}
 
   struct item_t {
+    item_t() {}
     item_t(const callback_f func, const std::string &prompt)
         : callback(func), prompt(prompt) {}
 
@@ -44,8 +47,8 @@ public:
     int operator()(void) const { return callback ? callback() : start(code); }
 
   private:
-    const std::string prompt, code;
-    const callback_f callback = nullptr;
+    std::string prompt, code;
+    callback_f callback = nullptr;
   };
 
   typedef int (*display_f)(const std::string &, const item_t[], std::size_t);

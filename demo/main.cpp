@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "demo_menu.h"
+#include "demo_menu.hpp"
 
 using stamen::Menu;
 
