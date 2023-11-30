@@ -3,17 +3,19 @@
 #include <format>
 #include <iostream>
 #include <ostream>
+#include <variant>
 
 namespace stamen {
 
-int builtinDisplay(const std::string &title, const Menu::item_t items[],
+int builtinDisplay(const std::string &title, const ::item_t items[],
                    std::size_t size) {
   int choice;
   const int digits = std::log10(size) + 1;
+
   while (true) {
     std::cout << std::format("{}:\n", title);
     for (auto i = 0ul; i < size; i++) {
-      std::cout << std::format(" {:{}}. {}\n", i, digits, items[i].getPrompt());
+      std::cout << std::format(" {:{}}. {}\n", i, digits, items[i].prompt);
     }
 
     while (true) {
@@ -24,11 +26,12 @@ int builtinDisplay(const std::string &title, const Menu::item_t items[],
           return 1;
         }
 
-        const Menu::item_t &chosen = items[choice];
-        std::cout << std::format("Choice: {}\n\n", chosen.getPrompt());
-        const int res = chosen();
-        if (res > 1) return res - 1;
-        else break;
+        std::cout << std::format("Choice: {}\n\n", items[choice].prompt);
+        const int res = items[choice].callback();
+        if (res > 1)
+          return res - 1;
+        else
+          break;
 
       } else if (std::cin.eof()) {
         std::cerr << "encountered end of input!\n";

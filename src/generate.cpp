@@ -16,7 +16,6 @@ public:
   static void generateInclude(std::ostream &os, bool cpp) {
     os << "#ifndef STAMEN_MENU_H\n";
     os << "#define STAMEN_MENU_H\n\n";
-    os << std::format("#include <stamen{}.h>\n\n", !cpp ? "c" : "");
     if (cpp) os << "namespace stamen {\n\n";
     for (const auto &[code, _] : Menu::getLookup()) {
       const Menu *menu = Menu::getMenu(code);
@@ -25,7 +24,7 @@ public:
       os << std::format("int {}(void);\n", menu->code);
     }
     if (cpp) os << "\n}\n";
-    os << "#endif\n";
+    os << "\n#endif\n";
   }
 
   static void generateSource(std::ostream &os, bool cpp) {
@@ -38,15 +37,13 @@ public:
       if (menu->callback) continue;
 
       os << std::format("int {}(void) {{\n", menu->code);
-      os << std::format("\tstatic const {}item_t items[] = {{\n",
-                        cpp ? "Menu::" : "");
+      os << std::format("\tstatic const item_t items[] = {{\n");
       for (const auto &item : menu->items) {
-        os << std::format("\t\t{{ {}, \"{}\" }},\n", item.getCode(),
-                          item.getPrompt());
+        os << std::format("\t\t{{ {}, \"{}\" }},\n", item.code, item.prompt);
       }
       os << std::format("\t}};\n");
-      os << std::format("\treturn {0}display(\"{1}\", items, "
-                        "sizeof(items) / sizeof({0}item_t));\n",
+      os << std::format("\treturn {}display(\"{}\", items, "
+                        "sizeof(items) / sizeof(item_t));\n",
                         cpp ? "Menu::" : "", menu->title);
       os << std::format("}}\n\n");
     }

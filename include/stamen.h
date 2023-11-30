@@ -32,41 +32,13 @@ public:
   Menu(private_ctor_t, const std::string &code, const callback_f callback)
       : Menu(code, callback) {}
 
-  struct item_t {
-    item_t() {}
-    item_t(const callback_f func, const std::string &prompt)
-        : callback(func), prompt(prompt) {}
-
-    item_t(const std::string &code, const std::string &prompt)
-        : code(code), prompt(prompt) {}
-
-    const std::string getCode(void) const { return code; }
-    const std::string getPrompt(void) const { return prompt; }
-    const callback_f getCallback(void) const { return callback; }
-
-    int operator()(void) const { return callback ? callback() : start(code); }
-
-  private:
-    std::string prompt, code;
-    callback_f callback = nullptr;
-  };
-
-  typedef int (*display_f)(const std::string &, const item_t[], std::size_t);
+  typedef int (*display_f)(const std::string &, const ::item_t[], std::size_t);
   static const display_f display;
 
   static void read(const std::string &s);
   static void insert(const std::string &code, const callback_f callback);
 
   static void print(const std::string &entry) { print(entry, 1); }
-  static int start(const std::string &entry) {
-    const Menu *menu = getMenu(entry);
-    if (!menu) return 1;
-    return menu->operator()();
-  }
-
-  int operator()() const {
-    return callback ? callback() : display(title, items.data(), items.size());
-  }
 
 private:
   Menu(const std::string &code, const std::string &prompt)
@@ -92,7 +64,14 @@ private:
 
   const std::string code, title;
   const callback_f callback = nullptr;
-  std::vector<item_t> items;
+
+  struct lookup_item_t {
+    lookup_item_t(const std::string &code, const std::string &prompt)
+        : code(code), prompt(prompt) {}
+    const std::string code, prompt;
+  };
+
+  std::vector<lookup_item_t> items;
 };
 
 inline void Menu::read(const std::string &s) {
@@ -132,13 +111,13 @@ inline void Menu::print(const std::string &code, const int depth) {
   if (!menu->callback) {
     for (const auto &item : menu->items) {
       std::cout << std::format("{}{} ({})\n", std::string(depth << 1, ' '),
-                               item.getPrompt(), item.getCode());
-      menu->print(item.getCode(), depth + 1);
+                               item.prompt, item.code);
+      menu->print(item.code, depth + 1);
     }
   }
 }
 
-int builtinDisplay(const std::string &title, const Menu::item_t items[],
+int builtinDisplay(const std::string &title, const ::item_t items[],
                    std::size_t size);
 
 } // namespace stamen

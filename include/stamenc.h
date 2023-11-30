@@ -20,7 +20,6 @@ extern const display_f display;
 
 EXTERNC void stamen_read(const char *file);
 EXTERNC void stamen_print(const char *entry);
-EXTERNC int stamen_start(const char *entry);
 EXTERNC void stamen_insert(const char *code, callback_f callback);
 EXTERNC int stamen_builtin_display(const char *title, const item_t items[], int size);
 
