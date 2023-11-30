@@ -1,13 +1,11 @@
-#include "../include/stamen.h"
 #include "../include/stamenc.h"
+#include "../include/stamen.h"
 
 using namespace stamen;
 
-const Menu::display_f Menu::display = nullptr;
-
 void stamen_read(const char *file) { stamen::Menu::read(file); }
 void stamen_print(const char *entry) { stamen::Menu::print(entry); }
-void stamen_insert(const char *code, callback_f callback) {
+void stamen_insert(const char *code, stamen_callback_f callback) {
   Menu::insert(code, callback);
 }
 

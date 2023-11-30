@@ -28,26 +28,28 @@ public:
   }
 
   static void generateSource(std::ostream &os, bool cpp) {
-    os << std::format("#include <stamen{}.h>\n", !cpp ? "c" : "");
+    os << "#include <stamenc.h>\n";
     os << "#include \"shared.h\"\n\n";
-    if (cpp) os << "namespace stamen {\n";
+    if (cpp) os << "namespace stamen {\n\n";
     for (const auto &[code, _] : Menu::getLookup()) {
       const Menu *menu = Menu::getMenu(code);
       if (!menu) throw EGenerate();
       if (menu->callback) continue;
 
       os << std::format("int {}(void) {{\n", menu->code);
+
       os << std::format("\tstatic const item_t items[] = {{\n");
-      for (const auto &item : menu->items) {
-        os << std::format("\t\t{{ {}, \"{}\" }},\n", item.code, item.prompt);
+      for (const auto &[code, prompt] : menu->items) {
+        os << std::format("\t\t{{ {}, \"{}\" }},\n", code, prompt);
       }
       os << std::format("\t}};\n");
-      os << std::format("\treturn {}display(\"{}\", items, "
+
+      os << std::format("\treturn stamen_display(\"{}\", items, "
                         "sizeof(items) / sizeof(item_t));\n",
-                        cpp ? "Menu::" : "", menu->title);
+                        menu->title);
       os << std::format("}}\n\n");
     }
-    if (cpp) os << "\n}\n";
+    if (cpp) os << "}\n";
   }
 };
 

@@ -3,7 +3,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
     Stamen
-    VERSION 0.0.13
+    VERSION 0.0.14
     DESCRIPTION "Static menu generator"
     LANGUAGES C CXX
 )

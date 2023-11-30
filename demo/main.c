@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const display_f display = stamen_builtin_display;
+const stamen_display_f stamen_display = stamen_builtin_display;
 
 int operation1(void) {
   printf("operation 1\n");

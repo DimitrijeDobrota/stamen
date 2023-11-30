@@ -1,7 +1,7 @@
 #ifndef STAMEN_H
 #define STAMEN_H
 
-#include "stamenc.h"
+#include "shared.h"
 
 #include <exception>
 #include <format>
@@ -16,14 +16,16 @@
 namespace stamen {
 
 class Menu {
+  struct private_ctor_t {};
+
 public:
   friend class Generator;
-  typedef int (*callback_f)(void);
+
+  typedef stamen_callback_f callback_f;
+  typedef stamen_display_f display_f;
 
   Menu(const Menu &) = delete;
   Menu &operator=(const Menu &) = delete;
-
-  struct private_ctor_t {};
 
   // Tag type dispatch
   Menu(private_ctor_t, const std::string &code, const std::string &prompt)
@@ -32,13 +34,9 @@ public:
   Menu(private_ctor_t, const std::string &code, const callback_f callback)
       : Menu(code, callback) {}
 
-  typedef int (*display_f)(const std::string &, const ::item_t[], std::size_t);
-  static const display_f display;
-
   static void read(const std::string &s);
+  static void print(const std::string &entry) { internal_print(entry, 1); }
   static void insert(const std::string &code, const callback_f callback);
-
-  static void print(const std::string &entry) { print(entry, 1); }
 
 private:
   Menu(const std::string &code, const std::string &prompt)
@@ -53,7 +51,7 @@ private:
     return lookup;
   }
 
-  static void print(const std::string &entry, const int depth);
+  static void internal_print(const std::string &entry, const int depth);
 
   static const Menu *getMenu(const std::string &code) {
     static lookup_t &lookup = getLookup();
@@ -65,12 +63,7 @@ private:
   const std::string code, title;
   const callback_f callback = nullptr;
 
-  struct lookup_item_t {
-    lookup_item_t(const std::string &code, const std::string &prompt)
-        : code(code), prompt(prompt) {}
-    const std::string code, prompt;
-  };
-
+  typedef std::pair<std::string, std::string> lookup_item_t;
   std::vector<lookup_item_t> items;
 };
 
@@ -102,23 +95,22 @@ inline void Menu::insert(const std::string &code, const callback_f callback) {
                       std::forward_as_tuple(private_ctor_t{}, code, callback));
 }
 
-inline void Menu::print(const std::string &code, const int depth) {
+inline void Menu::internal_print(const std::string &code, const int depth) {
   const Menu *menu = getMenu(code);
   if (!menu) return;
 
   if (depth == 1) std::cout << std::format("{}({})\n", menu->title, code);
 
   if (!menu->callback) {
-    for (const auto &item : menu->items) {
+    for (const auto &[code, prompt] : menu->items) {
       std::cout << std::format("{}{} ({})\n", std::string(depth << 1, ' '),
-                               item.prompt, item.code);
-      menu->print(item.code, depth + 1);
+                               prompt, code);
+      menu->internal_print(code, depth + 1);
     }
   }
 }
 
-int builtinDisplay(const std::string &title, const ::item_t items[],
-                   std::size_t size);
+int builtinDisplay(const char *title, const ::item_t items[], int size);
 
 } // namespace stamen
 

@@ -3,11 +3,9 @@
 
 #include <iostream>
 
-using stamen::Menu;
-
 // need to link against stamen library
 // in order to use stamen::BuiltinDisplay
-const Menu::display_f Menu::display = stamen::builtinDisplay;
+const stamen_display_f stamen_display = stamen::builtinDisplay;
 
 int operation1(void) {
   std::cout << "operation 1" << std::endl;
