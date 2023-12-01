@@ -7,9 +7,10 @@
 
 namespace stamen {
 
-int builtinDisplay(const char *title, const ::item_t items[], int size) {
-  const int digits = std::log10(size) + 1;
-  int choice;
+int builtinDisplay(const char *title, const ::item_t itemv[], int size) {
+  const size_t digits = size_t(std::log10(size)) + 1;
+  const auto items = std::span(itemv, size_t(size));
+  int choice = 0;
 
   while (true) {
     std::cout << std::format("{}:\n", title);

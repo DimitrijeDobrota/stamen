@@ -11,6 +11,7 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace stamen {
@@ -21,11 +22,13 @@ class Menu {
 public:
   friend class Generator;
 
-  typedef stamen_callback_f callback_f;
-  typedef stamen_display_f display_f;
+  using callback_f = stamen_callback_f;
+  using display_f = stamen_display_f;
 
   Menu(const Menu &) = delete;
+  Menu(Menu &&) = delete;
   Menu &operator=(const Menu &) = delete;
+  Menu &operator=(Menu &&) = delete;
 
   // Tag type dispatch
   Menu(private_ctor_t, const std::string &code, const std::string &prompt)
@@ -39,14 +42,14 @@ public:
   static void insert(const std::string &code, const callback_f callback);
 
 private:
-  Menu(const std::string &code, const std::string &prompt)
-      : code(code), title(prompt) {}
+  Menu(std::string code, std::string prompt)
+      : code(std::move(code)), title(std::move(prompt)) {}
 
   Menu(const std::string &code, const callback_f callback)
       : code(code), title(code), callback(callback) {}
 
-  typedef std::unordered_map<std::string, Menu> lookup_t;
-  static lookup_t &getLookup(void) {
+  using lookup_t = std::unordered_map<std::string, Menu>;
+  static lookup_t &getLookup() {
     static lookup_t lookup;
     return lookup;
   }
@@ -54,7 +57,7 @@ private:
   static void internal_print(const std::string &entry, const int depth);
 
   static const Menu *getMenu(const std::string &code) {
-    static lookup_t &lookup = getLookup();
+    const static lookup_t &lookup = getLookup();
     const auto it = lookup.find(code);
     if (it == lookup.end()) return nullptr;
     return &it->second;
@@ -63,17 +66,17 @@ private:
   const std::string code, title;
   const callback_f callback = nullptr;
 
-  typedef std::pair<std::string, std::string> lookup_item_t;
+  using lookup_item_t = std::pair<std::string, std::string>;
   std::vector<lookup_item_t> items;
 };
 
 inline void Menu::read(const std::string &s) {
   std::string line, delim, code, prompt;
   std::fstream fs(s);
-  char tmp;
+  char tmp = 0;
 
   lookup_t &lookup = getLookup();
-  lookup_t::iterator last = lookup.end();
+  auto last = lookup.end();
   while (std::getline(fs, line)) {
     if (line.empty()) continue;
     std::istringstream ss(line);
@@ -85,7 +88,7 @@ inline void Menu::read(const std::string &s) {
                          std::forward_as_tuple(private_ctor_t{}, code, prompt));
       last = iter;
     } else {
-      last->second.items.push_back({code, prompt});
+      last->second.items.emplace_back(code, prompt);
     }
   }
 }
@@ -110,7 +113,7 @@ inline void Menu::internal_print(const std::string &code, const int depth) {
   }
 }
 
-int builtinDisplay(const char *title, const ::item_t items[], int size);
+int builtinDisplay(const char *title, const ::item_t itemv[], int size);
 
 } // namespace stamen
 

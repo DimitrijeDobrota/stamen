@@ -8,7 +8,7 @@ namespace stamen {
 class Generator {
 public:
   class EGenerate : std::exception {
-    virtual const char *what() const noexcept override {
+    [[nodiscard]] const char *what() const noexcept override {
       return "Trying to access unknown code";
     }
   };
@@ -56,14 +56,16 @@ public:
 } // namespace stamen
 
 int main(const int argc, const char *argv[]) {
+  const auto args = std::span(argv, size_t(argc));
+
   if (argc != 2 && argc != 3) {
     std::cout << "please enter exaclty one config file" << std::endl;
     return 1;
   }
 
-  const bool cpp = argc == 2 || std::string(argv[2]) == "cpp";
+  const bool cpp = argc == 2 || std::string(args[2]) == "cpp";
 
-  std::string path = argv[1];
+  std::string path = args[1];
   Menu::read(path);
 
   std::string::size_type pos = path.rfind('.');
