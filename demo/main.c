@@ -1,9 +1,11 @@
 #include "demo_menu.h"
-#include "stamenc.h"
+#include "stamen.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
+// need to link against stamen library
+// in order to use stamen_builtin_display
 const stamen_display_f stamen_display = stamen_builtin_display;
 
 int operation1(void) {
@@ -27,11 +29,6 @@ int operation3(void) {
 int finish(void) {
   printf("finishing...\n");
   exit(0);
-}
-
-int menu_dynamic_print(void) {
-  stamen_print("menu_main");
-  return 1;
 }
 
 int main(void) {

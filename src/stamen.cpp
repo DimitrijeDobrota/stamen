@@ -1,13 +1,11 @@
-#include "../include/stamen.h"
+#include "stamen.h"
 #include <cmath>
 #include <format>
 #include <iostream>
 #include <ostream>
 #include <variant>
 
-namespace stamen {
-
-int builtinDisplay(const char *title, const ::item_t itemv[], int size) {
+int stamen_builtin_display(const char *title, const ::item_t itemv[], int size) {
   const size_t digits = size_t(std::log10(size)) + 1;
   const auto items = std::span(itemv, size_t(size));
   int choice = 0;
@@ -47,5 +45,3 @@ int builtinDisplay(const char *title, const ::item_t itemv[], int size) {
 
   return 1;
 }
-
-} // namespace stamen

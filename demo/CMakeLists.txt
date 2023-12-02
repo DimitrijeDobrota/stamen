@@ -35,7 +35,7 @@ add_executable(cdemo
 )
 
 target_link_libraries(cdemo
-    stamenc
+    stamen
 )
 
 add_custom_command(
