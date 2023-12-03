@@ -24,6 +24,8 @@ maximum flexibility while maintaining minimalism.
 * Clone the repo
 * Make a build folder and cd into it
 * Run `cmake -DCMAKE_BUILD_TYPE=Release <path to cloned repo>`
+* Run `make`
+* If desired run `make install` in order to install the library and generator program
 
 
 ### Configuration
@@ -68,74 +70,49 @@ Please reference demo folder for relevant usage example.
 
 There are a few things needed before you begin.
 
-* Everything is contained in the `stamen namespace`
-* Panel and item codes must be one word. In addition they must be valid C++
+* Panel and item codes must be one word. In addition they must be valid C/C++
 function names if static menu is to be build correctly.
 * Each free function must have `int name(void)` signature as prescribed by
-`Menu::callback_f`.
-* You must set a value of the static variable `const Menu::display_f
-Menu::display` to specify function used for displaying the menu. You can start
-by using a build in `stamen::builtinDisplay`, just make sure to link stamen library
-while building your project.
+`stamen_callback_f`.
+* You must set a value of the static variable `const stamen_display_f
+stamen_display` to specify function used for displaying the menu. You can start
+by using a build in `stamen_builtin_display`, just make sure to link stamen
+library while building your project.
 
-
-#### Dynamic menu
-
-In dynamic mode, configuration file is read every time the program is run. In
-order to invoke the menu you need to add the following code to your C++
-program:
-
-```
-// shorthand
-using stamen::Menu;
-
-// read the configuration
-Menu::read("path to config");
-
-// register free functions
-Menu::insert("reference name", some_function);
-...
-
-// start the menu on specific panel
-Menu::start("panel code");
-
-// print tree-like menu structure
-// starting from a specific panel
-// for debugging purposes
-Menu::print("panel code");
-```
 
 #### Static menu
 
 After writing a configuration file, run `./bin/generate <config file>` which
 will create source file and include file in the current directory with the name
-as the configuration file but with extensions `.cpp` and `.h` respectively.
+as the configuration file but with extensions `.cpp` and `.hpp` respectively.
+You can create  files with extensions `.c` and `.h` by appending C to previous
+command
 
-Include file will contain declarations for all of the menu functions inside
-`stamen` namespace. You should include this file in your code.
+Include file will contain declarations for all of the menu functions. You
+should include this file in your code.
 
 Source file contains definitions for the menu functions. It also includes
 `shared.h` file which should contain declarations for all of the free functions
-you have specified in the configuration. Generated source file should be
-compiled with the rest of your code. You can call any function to display the
-menu starting from that specific pane.
+you have specified in the configuration.
+
+Generated source file should be compiled with the rest of your code.
+
+You can call any function to display the menu starting from that specific pane.
 
 
 #### Custom display function
 
-Please refer to the implementation of `stamen::builtinDisplay` to get a general
+Please refer to the implementation of `stamen_builtin_display` to get a general
 idea of the direction.
 
-A display function should have `int name(const std::string&, const
-Menu::item_t[], std::size_t)` signature as prescribed by `Menu::display_f`. To
-get information about the specific item use `getPrompt()` and `getCallback()`
-member functions.
+A display function should have `int name(const char*, const item_t[], int)`
+signature as prescribed by `stamen_display_f`.
 
-After prompting user to select one of the items all you have to do is call
-`operator()` on selected item to invoke the next panel or free function. The
-return type of int is intended to be used as a measure how many panels back
-should be backtracked after a free function terminates, but you can use in any
-way you see fit.
+After prompting user to select one of the items all you have to do is call a
+function pointed to by the callback field on selected item to invoke the next
+panel or free function. The return type of int is intended to be used as a
+measure how many panels back should be backtracked after a free function
+terminates, but you can use in any way you see fit.
 
 
 ## Version History
