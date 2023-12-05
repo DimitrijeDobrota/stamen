@@ -57,3 +57,17 @@ set_target_properties(cdemo PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR}
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+
+add_executable(dynamic
+    dynamic.cpp
+)
+
+target_link_libraries(dynamic
+    stamen
+)
+
+set_target_properties(dynamic PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)

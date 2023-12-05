@@ -1,5 +1,7 @@
 #include "menu.h"
+#include "stamen.h"
 
+#include <deque>
 #include <format>
 #include <fstream>
 #include <iostream>
@@ -7,40 +9,62 @@
 #include <tuple>
 #include <utility>
 
-Menu::lookup_t Menu::lookup;
+std::unordered_map<std::string, Menu> Menu::menu_lookup;
+std::unordered_map<std::string, Menu::callback_f> Menu::free_lookup;
 
 void Menu::read(const std::string &s) {
   std::string line, delim, code, prompt;
   std::fstream fs(s);
   char tmp = 0;
 
-  lookup_t &lookup = getLookup();
-  auto last = lookup.end();
+  auto last = menu_lookup.end();
   while (std::getline(fs, line)) {
     if (line.empty()) continue;
     std::istringstream ss(line);
     ss >> delim >> code;
     ss.ignore(1, ' '), std::getline(ss, prompt);
     if (delim == "+") {
-      const auto [iter, succ] =
-          lookup.emplace(std::piecewise_construct, std::forward_as_tuple(code),
-                         std::forward_as_tuple(private_ctor_t{}, code, prompt));
+      const auto [iter, succ] = menu_lookup.emplace(
+          std::piecewise_construct, std::forward_as_tuple(code),
+          std::forward_as_tuple(private_ctor_t{}, code, prompt));
       last = iter;
     } else {
-      last->second.lookup_items.emplace_back(code, prompt);
+      last->second.entries.insert(code, prompt);
     }
   }
 }
 
-void Menu::internal_print(const std::string &code, const int depth) {
+void Menu::print(const std::string &code, const int depth) {
   const Menu *menu = getMenu(code);
   if (!menu) return;
 
   if (depth == 1) std::cout << std::format("{}({})\n", menu->title, code);
 
-  for (const auto &[code, prompt] : menu->lookup_items) {
+  for (int i = 0; i < menu->getSize(); i++) {
     std::cout << std::format("{}{} ({})\n", std::string(depth << 1, ' '),
-                             prompt, code);
-    menu->internal_print(code, depth + 1);
+                             menu->getPrompt(i), menu->getCode(i));
+    menu->print(code, depth + 1);
   }
+}
+
+int Menu::display_stub(int idx) {
+  static std::deque<const Menu *> st;
+
+  const std::string &code = st.size() ? st.back()->getCode(idx) : "menu_main";
+
+  const auto ml_it = menu_lookup.find(code);
+  if (ml_it != menu_lookup.end()) {
+    const Menu &menu = ml_it->second;
+    st.push_back(&menu);
+    int ret = stamen_builtin_display(menu.title.c_str(), menu.getItemv(),
+                                     menu.getSize());
+    st.pop_back();
+    return ret;
+  }
+
+  const auto fl_it = free_lookup.find(code);
+  if (fl_it != free_lookup.end()) { return fl_it->second(0); }
+
+  std::cout << "Stamen: nothing to do..." << std::endl;
+  return 1;
 }

@@ -1,4 +1,6 @@
 #include "menu.h"
+#include "stamen.h"
+
 #include <format>
 #include <fstream>
 #include <iostream>
@@ -10,8 +12,8 @@ public:
     os << "#ifndef STAMEN_MENU_H\n";
     os << "#define STAMEN_MENU_H\n\n";
     os << "#include <stamen.h>\n\n";
-    for (const auto &[code, menu] : Menu::getLookup()) {
-      os << std::format("int {}(void);\n", menu.getCode());
+    for (const auto &[code, menu] : Menu::menu_lookup) {
+      os << std::format("int {}(int);\n", menu.getCode());
     }
     os << "\n#endif\n";
   }
@@ -19,12 +21,13 @@ public:
   static void generateSource(std::ostream &os) {
     os << "#include <stamen.h>\n";
     os << "#include \"shared.h\"\n\n";
-    for (const auto &[code, menu] : Menu::getLookup()) {
-      os << std::format("int {}(void) {{\n", menu.getCode());
+    for (const auto &[code, menu] : Menu::menu_lookup) {
+      os << std::format("int {}(int) {{\n", menu.getCode());
 
-      os << std::format("\tstatic const item_t items[] = {{\n");
-      for (const auto &[code, prompt] : menu.getItems()) {
-        os << std::format("\t\t{{ {}, \"{}\" }},\n", code, prompt);
+      os << std::format("\tstatic const stamen_item_t items[] = {{\n");
+      for (int i = 0; i < menu.getSize(); i++) {
+        os << std::format("\t\t{{ {}, \"{}\" }},\n", menu.getCode(i),
+                          menu.getPrompt(i));
       }
       os << std::format("\t}};\n");
 

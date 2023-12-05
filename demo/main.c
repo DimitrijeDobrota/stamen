@@ -32,6 +32,6 @@ int finish(void) {
 }
 
 int main(void) {
-  menu_main();
+  menu_main(0);
   return 0;
 }

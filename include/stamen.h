@@ -7,17 +7,22 @@
 #define EXTERNC extern
 #endif
 
-typedef int (*stamen_callback_f)(void);
+typedef int (*stamen_callback_f)(int);
 
-typedef struct item_t item_t;
-struct item_t {
+typedef struct stamen_item_t stamen_item_t;
+struct stamen_item_t {
   stamen_callback_f callback;
   const char *prompt;
 };
 
-typedef int (*stamen_display_f)(const char *, const item_t[], int);
+typedef int (*stamen_display_f)(const char *, const stamen_item_t[], int);
 extern const stamen_display_f stamen_display;
 
-EXTERNC int stamen_builtin_display(const char *title, const item_t itemv[], int size);
+EXTERNC int stamen_dynamic(void);
+EXTERNC void stamen_read(const char *filename);
+EXTERNC void stamen_insert(const char *code, stamen_callback_f callback);
+
+EXTERNC int stamen_builtin_display(const char *title,
+                                   const stamen_item_t itemv[], int size);
 
 #endif

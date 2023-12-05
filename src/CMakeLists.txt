@@ -1,7 +1,7 @@
 add_library(stamen-include INTERFACE)
 target_include_directories(stamen-include INTERFACE ../include)
 
-add_library(stamen stamen.cpp)
+add_library(stamen stamen.cpp menu.cpp)
 target_link_libraries(stamen PUBLIC stamen-include)
 set_target_properties(stamen PROPERTIES
     VERSION ${PROJECT_VERSION}
@@ -14,8 +14,8 @@ install(TARGETS stamen
     PUBLIC_HEADER DESTINATION include
 )
 
-add_executable(stamen-generate generate.cpp menu.cpp)
-target_link_libraries(stamen-generate PRIVATE stamen-include)
+add_executable(stamen-generate generate.cpp)
+target_link_libraries(stamen-generate PRIVATE stamen)
 target_include_directories(stamen-generate PUBLIC ../include)
 
 set_target_properties(stamen-generate PROPERTIES
