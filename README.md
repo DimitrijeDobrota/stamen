@@ -5,10 +5,15 @@ Static menu generator written in C++20
 
 ## Description
 
-The goal of the project is experimentation.I have been toying with flexible
-menus for a while and I've noticed a lot of boilerplate code emerging. That's
-why I decided to automate the task by generating menus on the fly. I aim for
-maximum flexibility while maintaining minimalism.
+This project allows for a creation of static menus, to be used in C or C++, on
+the fly. The stamen library acts as a framework for linking and keeping track
+of the menus, whilst allowing a custom display function to be used for maximum
+flexibility. In dynamic mode configuration file can be read on the fly without
+recompilation.
+
+The main goal of this project is experimentation. I have been toying with menus
+for a while and I've noticed a lot of boilerplate code emerging.  That's why I
+decided to automate the task by generating menus on the fly.
 
 
 ## Getting Started
@@ -56,7 +61,7 @@ parts: code(one word) and title(rest of the line).
 Item entity is detonated by `-` sign at the start of the line and consists of
 two parts: code(one word) and prompt(rest of the line).
 
-Menu entity creates a new panel, and each subsequent menu item is added as an
+Panel entity creates a new panel, and each subsequent menu item is added as an
 option to the panel, until new panel is created.
 
 Panel code is an unique reference to the panel, whilst item code can be a
@@ -72,8 +77,10 @@ There are a few things needed before you begin.
 
 * Panel and item codes must be one word. In addition they must be valid C/C++
 function names if static menu is to be build correctly.
-* Each free function must have `int name(void)` signature as prescribed by
-`stamen_callback_f`.
+* Each free function must have `int name(int)` signature as prescribed by
+`stamen_callback_f`. Passed int doesn't need to serve any specific purpose,
+it is intended to detonate the position of an item in the previous panel
+which is essential for dynamic menu implementation.
 * You must set a value of the static variable `const stamen_display_f
 stamen_display` to specify function used for displaying the menu. You can start
 by using a build in `stamen_builtin_display`, just make sure to link stamen
@@ -114,6 +121,28 @@ panel or free function. The return type of int is intended to be used as a
 measure how many panels back should be backtracked after a free function
 terminates, but you can use in any way you see fit.
 
+
+#### Dynamic menu
+
+In dynamic mode, configuration file is read every time the program is run. In
+order to invoke the menu you need to add the following code to your C/C++
+program:
+
+```
+#include <stamen.h>
+
+const stamen_display_f stamen_display = stamen_builtin_display;
+
+// read the configuration
+stamen_read("path to config");
+
+// register free functions
+stamen_insert("free function code", some_free_function);
+...
+
+// start the menu on specific panel
+stamen_dynamic("panel code");
+```
 
 ## Version History
 
