@@ -1,7 +1,7 @@
-#include <stamen.h>
 #include <iostream>
+#include <stamen.h>
 
-const stamen_display_f stamen_display = stamen_builtin_display;
+const stamen::display_f stamen_display = stamen::builtin_display;
 
 int finish(int) { exit(1); }
 
@@ -21,11 +21,16 @@ int operation3(int) {
 }
 
 int main() {
-  stamen_read("./bin/demo_menu.conf");
-  stamen_insert("finish", finish);
-  stamen_insert("operation1", operation1);
-  stamen_insert("operation2", operation2);
-  stamen_insert("operation3", operation3);
-  stamen_dynamic();
+  // read the configuration
+  stamen::read("./bin/demo_menu.conf");
+
+  // register free functions
+  stamen::insert("finish", finish);
+  stamen::insert("operation1", operation1);
+  stamen::insert("operation2", operation2);
+  stamen::insert("operation3", operation3);
+
+  // start the menu on specific panel
+  stamen::dynamic("menu_main");
   return 0;
 }

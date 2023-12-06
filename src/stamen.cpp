@@ -7,7 +7,9 @@
 #include <ostream>
 #include <variant>
 
-int stamen_dynamic(void) { return Menu::dynamic(); }
+using namespace stamen;
+
+int stamen_dynamic(const char *code) { return Menu::dynamic(code); }
 void stamen_read(const char *filename) { Menu::read(filename); }
 void stamen_insert(const char *code, stamen_callback_f callback) {
   Menu::insert(code, callback);

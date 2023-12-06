@@ -9,14 +9,14 @@
 #include <unordered_map>
 #include <vector>
 
+namespace stamen {
+
 class Menu {
   friend class Generator;
 
-  using callback_f = stamen_callback_f;
-  using item_t = stamen_item_t;
-
   static std::unordered_map<std::string, Menu> menu_lookup;
   static std::unordered_map<std::string, callback_f> free_lookup;
+  static std::string display_stub_default;
 
   struct private_ctor_t {};
 
@@ -28,7 +28,10 @@ public:
   Menu(const Menu &) = delete;
   Menu &operator=(const Menu &) = delete;
 
-  static int dynamic() { return display_stub(-1); };
+  static int dynamic(const std::string &code) {
+    display_stub_default = code;
+    return display_stub(-1);
+  };
   static void read(const std::string &s);
   static void print(const std::string &entry) { print(entry, 1); }
   static void insert(const std::string &s, callback_f callback) {
@@ -60,17 +63,15 @@ private:
   static void print(const std::string &entry, const int depth);
   static int display_stub(int idx);
 
-  static const Menu *getMenu(const std::string &code) {
-    const auto it = menu_lookup.find(code);
-    if (it == menu_lookup.end()) return nullptr;
-    return &it->second;
-  }
-
   struct Entries {
     struct code_t {
       const std::string code;
       const std::string prompt;
     };
+
+    ~Entries() {
+      for (const auto [_, prompt] : items) delete[] prompt;
+    }
 
     std::vector<code_t> codes;
     std::vector<item_t> items;
@@ -88,5 +89,7 @@ private:
   const std::string code, title;
   Entries entries;
 };
+
+} // namespace stamen
 
 #endif

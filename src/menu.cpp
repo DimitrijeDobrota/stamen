@@ -9,8 +9,11 @@
 #include <tuple>
 #include <utility>
 
+namespace stamen {
+
 std::unordered_map<std::string, Menu> Menu::menu_lookup;
-std::unordered_map<std::string, Menu::callback_f> Menu::free_lookup;
+std::unordered_map<std::string, callback_f> Menu::free_lookup;
+std::string Menu::display_stub_default;
 
 void Menu::read(const std::string &s) {
   std::string line, delim, code, prompt;
@@ -35,8 +38,9 @@ void Menu::read(const std::string &s) {
 }
 
 void Menu::print(const std::string &code, const int depth) {
-  const Menu *menu = getMenu(code);
-  if (!menu) return;
+  const auto it = menu_lookup.find(code);
+  if (it == menu_lookup.end()) return;
+  const Menu *menu = &it->second;
 
   if (depth == 1) std::cout << std::format("{}({})\n", menu->title, code);
 
@@ -50,7 +54,8 @@ void Menu::print(const std::string &code, const int depth) {
 int Menu::display_stub(int idx) {
   static std::deque<const Menu *> st;
 
-  const std::string &code = st.size() ? st.back()->getCode(idx) : "menu_main";
+  const std::string &code =
+      st.size() ? st.back()->getCode(idx) : display_stub_default;
 
   const auto ml_it = menu_lookup.find(code);
   if (ml_it != menu_lookup.end()) {
@@ -68,3 +73,5 @@ int Menu::display_stub(int idx) {
   std::cout << "Stamen: nothing to do..." << std::endl;
   return 1;
 }
+
+} // namespace stamen

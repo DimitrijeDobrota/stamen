@@ -75,6 +75,8 @@ Please reference demo folder for relevant usage example.
 
 There are a few things needed before you begin.
 
+* All types and functions with prefix stamen_ are also available in namespace
+stamen:: in C++ for easier use.
 * Panel and item codes must be one word. In addition they must be valid C/C++
 function names if static menu is to be build correctly.
 * Each free function must have `int name(int)` signature as prescribed by
@@ -125,7 +127,7 @@ terminates, but you can use in any way you see fit.
 #### Dynamic menu
 
 In dynamic mode, configuration file is read every time the program is run. In
-order to invoke the menu you need to add the following code to your C/C++
+order to invoke the menu you need to add the following snippet to your C
 program:
 
 ```
@@ -143,6 +145,25 @@ stamen_insert("free function code", some_free_function);
 // start the menu on specific panel
 stamen_dynamic("panel code");
 ```
+
+For C++ there is a namespaced version of the functions:
+```
+#include <stamen.h>
+
+const stamen::display_f stamen_display = stamen::builtin_display;
+
+// read the configuration
+stamen::read("path to config");
+
+// register free functions
+stamen::insert("free function code", some_free_function);
+...
+
+// start the menu on specific panel
+stamen::dynamic("panel code");
+```
+
+`
 
 ## Version History
 

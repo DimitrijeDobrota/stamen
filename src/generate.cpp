@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+namespace stamen {
+
 class Generator {
 public:
   static void generateInclude(std::ostream &os) {
@@ -38,6 +40,10 @@ public:
     }
   }
 };
+
+} // namespace stamen
+
+using namespace stamen;
 
 int main(const int argc, const char *argv[]) {
   const auto args = std::span(argv, size_t(argc));
