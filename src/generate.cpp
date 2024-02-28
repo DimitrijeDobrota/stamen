@@ -49,7 +49,7 @@ int main(const int argc, const char *argv[]) {
   const auto args = std::span(argv, size_t(argc));
 
   if (argc != 2 && argc != 3) {
-    std::cout << "please enter exaclty one config file" << std::endl;
+    std::cout << argv[0] << " config_file [c/cpp]" << std::endl;
     return 1;
   }
 

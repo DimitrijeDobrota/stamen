@@ -71,7 +71,7 @@ reference to another panel or any other function (from now on referred to as
 
 ### Usage
 
-Please reference demo folder for relevant usage example.
+> Please reference demo folder for relevant usage example.
 
 There are a few things needed before you begin.
 

@@ -1,70 +1,53 @@
-add_executable(demo
-    main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/demo_menu.cpp
-)
+set(GENERATE_OUT "${CMAKE_BINARY_DIR}/bin")
 
-target_link_libraries(demo
-    stamen
-)
+configure_file(demo_menu.conf ${GENERATE_OUT}/demo_menu.conf COPYONLY)
 
 add_custom_command(
-    OUTPUT demo_menu.hpp demo_menu.cpp
-    COMMAND ${CMAKE_BINARY_DIR}/bin/stamen-generate ${CMAKE_CURRENT_SOURCE_DIR}/demo_menu.conf
+    OUTPUT ${GENERATE_OUT}/demo_menu.hpp ${GENERATE_OUT}/demo_menu.cpp
+    COMMAND ${GENERATE_OUT}/stamen-generate ${GENERATE_OUT}/demo_menu.conf
     DEPENDS demo_menu.conf stamen-generate
     COMMENT "Generating menu files"
 )
 
-add_custom_target(GenerateMenu
-    DEPENDS demo_menu.hpp demo_menu.cpp
-    COMMENT "Check if re-generation of menu files is required"
+add_executable(demo
+    main.cpp
+    ${GENERATE_OUT}/demo_menu.cpp
 )
 
-add_dependencies(demo GenerateMenu)
+target_link_libraries(demo stamen)
+target_include_directories(demo PRIVATE ${GENERATE_OUT} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set_target_properties(demo PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY "${GENERATE_OUT}"
 )
 
-configure_file(demo_menu.conf ${CMAKE_BINARY_DIR}/bin/demo_menu.conf COPYONLY)
+
+
+add_custom_command(
+    OUTPUT ${GENERATE_OUT}/demo_menu.h ${GENERATE_OUT}/demo_menu.c
+    COMMAND ${GENERATE_OUT}/stamen-generate ${GENERATE_OUT}/demo_menu.conf c
+    DEPENDS demo_menu.conf stamen-generate
+    COMMENT "Generating cmenu files"
+)
 
 add_executable(cdemo
     main.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/demo_menu.c
+    ${GENERATE_OUT}/demo_menu.c
 )
 
-target_link_libraries(cdemo
-    stamen
-)
-
-add_custom_command(
-    OUTPUT demo_menu.h demo_menu.c
-    COMMAND ${CMAKE_BINARY_DIR}/bin/stamen-generate ${CMAKE_CURRENT_SOURCE_DIR}/demo_menu.conf c
-    DEPENDS demo_menu.conf stamen-generate
-    COMMENT "Generating menu files"
-)
-
-add_custom_target(GenerateMenuC
-    DEPENDS demo_menu.h demo_menu.c
-    COMMENT "Check if re-generation of menu files is required"
-)
-
-add_dependencies(cdemo GenerateMenuC)
+target_link_libraries(cdemo stamen)
+target_include_directories(cdemo PRIVATE ${GENERATE_OUT} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set_target_properties(cdemo PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY "${GENERATE_OUT}"
 )
 
-add_executable(dynamic
-    dynamic.cpp
-)
-
-target_link_libraries(dynamic
-    stamen
-)
+add_executable(dynamic dynamic.cpp)
+target_link_libraries(dynamic stamen)
 
 set_target_properties(dynamic PROPERTIES
     VERSION ${PROJECT_VERSION}
