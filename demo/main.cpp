@@ -12,9 +12,6 @@ int test_display(const char *title, const stamen::item_t itemv[], int size) {
     return 0;
 }
 
-// no need to link against stamen library as custom display is provided
-const stamen::display_f stamen::stamen_display = test_display;
-
 int operation1(int) {
     std::cout << "operation 1" << std::endl;
     std::cout << "Some operation is done" << std::endl;

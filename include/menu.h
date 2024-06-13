@@ -22,8 +22,9 @@ class Menu {
     Menu(const Menu &) = delete;
     Menu &operator=(const Menu &) = delete;
 
-    static int dynamic(const std::string &code) {
-        display_stub_default = code;
+    static int dynamic(const std::string &code, display_f display) {
+        Menu::display_stub_default = code;
+        Menu::display = display;
         return display_stub(-1);
     };
 
@@ -92,6 +93,7 @@ class Menu {
 
     static std::unordered_map<std::string, callback_f> free_lookup;
     static std::string display_stub_default;
+    static display_f display;
 };
 
 } // namespace stamen

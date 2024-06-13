@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// need to link against stamen library
-// in order to use stamen_builtin_display
-const stamen_display_f stamen_display = stamen_builtin_display;
-
 int operation1(void) {
     printf("operation 1\n");
     printf("Some operation is done\n");

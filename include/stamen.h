@@ -15,14 +15,13 @@ struct stamen_item_t {
 };
 
 typedef int (*stamen_display_f)(const char *, const stamen_item_t[], int);
-extern const stamen_display_f stamen_display;
 
 #if !defined __cplusplus || defined WITH_C_BINDINGS
 
 void stamen_read(const char *filename);
 void stamen_insert(const char *code, stamen_callback_f callback);
 
-int stamen_dynamic(const char *code);
+int stamen_dynamic(const char *code, stamen_display_f display);
 int stamen_builtin_display(const char *title, const stamen_item_t itemv[],
                            int size);
 

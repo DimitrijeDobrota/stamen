@@ -13,6 +13,7 @@ namespace stamen {
 std::unordered_map<std::string, Menu> Menu::menu_lookup;
 std::unordered_map<std::string, callback_f> Menu::free_lookup;
 std::string Menu::display_stub_default;
+display_f Menu::display;
 
 void Menu::read(const std::string &s) {
     std::string line, delim, code, prompt;
@@ -61,7 +62,7 @@ int Menu::display_stub(int idx) {
     if (ml_it != menu_lookup.end()) {
         const Menu &menu = ml_it->second;
         st.push_back(&menu);
-        int ret = stamen_display(menu.title.c_str(), menu.getItemv(), menu.getSize());
+        int ret = display(menu.title.c_str(), menu.getItemv(), menu.getSize());
         st.pop_back();
         return ret;
     }

@@ -10,13 +10,14 @@
 
 namespace stamen {
 
-__attribute__((weak))
-extern const stamen_display_f stamen_display  = stamen_builtin_display;
-
-int dynamic(const char *code) { return Menu::dynamic(code); }
 void read(const char *filename) { Menu::read(filename); }
+
 void insert(const char *code, callback_f callback) {
     Menu::insert(code, callback);
+}
+
+int dynamic(const char *code, display_f display) {
+    return Menu::dynamic(code, display);
 }
 
 int builtin_display(const char *title, const item_t itemv[], int size) {

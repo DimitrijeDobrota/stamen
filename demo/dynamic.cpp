@@ -1,10 +1,6 @@
 #include "stamen.hpp"
 #include <iostream>
 
-// still need to link against stamen library
-// as builtin_display is being used
-// because there is no override
-
 int finish(int) { exit(1); }
 
 int operation1(int) {
@@ -33,6 +29,6 @@ int main() {
     stamen::insert("operation3", operation3);
 
     // start the menu on specific panel
-    stamen::dynamic("menu_main");
+    stamen::dynamic("menu_main", stamen::builtin_display);
     return 0;
 }

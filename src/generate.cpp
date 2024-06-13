@@ -10,6 +10,7 @@
 
 struct arguments_t {
     std::string config;
+    std::string display;
     bool cpp = false;
     bool user = false;
 } opt;
@@ -41,6 +42,10 @@ void generateSource(std::ostream &os) {
     os << "#include \"shared.h\"\n";
     generateIncludeHeaders(os);
 
+    os << std::format("extern int {}(const char *title, ", opt.display);
+    if (opt.cpp) os << "const stamen::item_t itemv[], int size);\n\n";
+    else os << "const stamen_item_t itemv[], int size);\n\n";
+
     for (const auto &[code, menu] : stamen::Menu::menu_lookup) {
         os << std::format("int {}(int) {{\n", menu.getCode());
 
@@ -54,10 +59,7 @@ void generateSource(std::ostream &os) {
         }
         os << "\t};\n";
 
-        if (opt.cpp) os << "\treturn stamen::stamen_display";
-        else os << "\treturn stamen_display";
-
-        os << std::format("(\"{}\"", menu.getTitle());
+        os << std::format("\treturn {}(\"{}\"", opt.display, menu.getTitle());
         os << ", items, sizeof(items) / sizeof(items[0]));\n";
         os << "}\n\n";
     }
@@ -67,6 +69,7 @@ int parse_opt(int key, const char *arg, args::Parser *parser) {
     auto arguments = (arguments_t *)parser->input();
     switch (key) {
     case 'u': arguments->user = true; break;
+    case 'd': arguments->display = arg; break;
     case 666: arguments->cpp = false; break;
     case 777: arguments->cpp = true; break;
     case args::ARG:
@@ -78,6 +81,12 @@ int parse_opt(int key, const char *arg, args::Parser *parser) {
     case args::NO_ARGS:
         args::failure(parser, 0, 0, "Missing an argument");
         args::help(parser, stderr, args::STD_USAGE);
+    case args::END:
+        if (arguments->display.empty()) {
+            if (arguments->cpp) arguments->display = "stamen::builtin_display";
+            else arguments->display = "stamen_builtin_display";
+        }
+        break;
     }
     return 0;
 }
@@ -87,6 +96,7 @@ static const args::option_t options[]{
     {"c", 666, 0, 0, "Generate files for C"},
     {"cpp", 777, 0, 0, "Generate files for C++"},
     {0, 0, 0, 0, "Output settings", 2},
+    {"display", 'd', "FUNC", 0, "Set display function to be called"},
     {"user", 'u', 0, 0, "Include user stamen headers"},
     {0, 0, 0, 0, "Informational Options", -1},
     {0},
