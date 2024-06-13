@@ -16,5 +16,86 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+include(GNUInstallDirs)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
+
+set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory for libraries")
+set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Installation directory for executables")
+set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for header files")
+if(WIN32 AND NOT CYGWIN)
+	set(DEF_INSTALL_CMAKEDIR CMake)
+else()
+	set(DEF_INSTALL_CMAKEDIR share/cmake/${PROJECT_NAME})
+endif()
+set(INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
+
+message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
+message(STATUS "Project will be installed to ${CMAKE_INSTALL_PREFIX}")
+foreach(p LIB BIN INCLUDE CMAKE)
+	file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${p}DIR} _path)
+	message(STATUS "installing ${p} components to ${_path}")
+	unset(_path)
+endforeach()
+
 add_subdirectory(src)
 add_subdirectory(demo)
+
+install(
+	TARGETS
+        stamen-generate
+		stamen
+	EXPORT
+		stamenTargets
+	ARCHIVE
+		DESTINATION ${INSTALL_LIBDIR}
+		COMPONENT lib
+	RUNTIME
+		DESTINATION ${INSTALL_BINDIR}
+		COMPONENT bin
+	LIBRARY
+		DESTINATION ${INSTALL_LIBDIR}
+		COMPONENT lib
+	PUBLIC_HEADER
+		DESTINATION ${INSTALL_INCLUDEDIR}/stamen
+		COMPONENT dev
+)
+
+install(
+	EXPORT
+		stamenTargets
+	NAMESPACE
+		"stamen::"
+	DESTINATION
+		${INSTALL_CMAKEDIR}
+	COMPONENT
+		dev
+)
+
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/stamenConfigVersion.cmake
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+	${PROJECT_SOURCE_DIR}/stamenConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/stamenConfig.cmake
+	INSTALL_DESTINATION ${INSTALL_CMAKEDIR}
+)
+
+install(
+	FILES
+		${CMAKE_CURRENT_BINARY_DIR}/stamenConfig.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/stamenConfigVersion.cmake
+	DESTINATION
+		${INSTALL_CMAKEDIR}
+)

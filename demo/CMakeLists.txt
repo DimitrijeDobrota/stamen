@@ -11,7 +11,7 @@ add_custom_command(
 
 add_executable(demo main.cpp ${GENERATE_OUT}/demo_menu.cpp)
 # target_link_libraries(demo stamen) - no need to link
-target_include_directories(demo PUBLIC ../include)
+target_include_directories(demo PRIVATE ../include)
 set_target_properties(demo PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(demo PRIVATE ${GENERATE_OUT} ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -41,6 +41,7 @@ set_target_properties(cdemo PROPERTIES
 
 add_executable(dynamic dynamic.cpp)
 target_link_libraries(dynamic stamen)
+target_include_directories(dynamic PRIVATE ../include)
 set_target_properties(dynamic PROPERTIES LINKER_LANGUAGE CXX)
 
 set_target_properties(dynamic PROPERTIES
