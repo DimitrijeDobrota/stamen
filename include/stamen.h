@@ -10,8 +10,8 @@ typedef int (*stamen_callback_f)(int);
 
 typedef struct stamen_item_t stamen_item_t;
 struct stamen_item_t {
-  stamen_callback_f callback;
-  const char *prompt;
+    stamen_callback_f callback;
+    const char *prompt;
 };
 
 typedef int (*stamen_display_f)(const char *, const stamen_item_t[], int);
