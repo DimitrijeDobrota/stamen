@@ -4,7 +4,7 @@ configure_file(demo_menu.conf ${GENERATE_OUT}/demo_menu.conf COPYONLY)
 
 add_custom_command(
     OUTPUT ${GENERATE_OUT}/demo_menu.hpp ${GENERATE_OUT}/demo_menu.cpp
-    COMMAND ${GENERATE_OUT}/stamen-generate --cpp ${GENERATE_OUT}/demo_menu.conf
+    COMMAND ${GENERATE_OUT}/stamen-generate --user --cpp ${GENERATE_OUT}/demo_menu.conf
     DEPENDS demo_menu.conf stamen-generate
     COMMENT "Generating menu files"
 )
@@ -23,7 +23,7 @@ set_target_properties(demo PROPERTIES
 
 add_custom_command(
     OUTPUT ${GENERATE_OUT}/demo_menu.h ${GENERATE_OUT}/demo_menu.c
-    COMMAND ${GENERATE_OUT}/stamen-generate --c ${GENERATE_OUT}/demo_menu.conf
+    COMMAND ${GENERATE_OUT}/stamen-generate --user --c ${GENERATE_OUT}/demo_menu.conf
     DEPENDS demo_menu.conf stamen-generate
     COMMENT "Generating cmenu files"
 )

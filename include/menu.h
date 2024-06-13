@@ -12,12 +12,6 @@
 namespace stamen {
 
 class Menu {
-    friend class Generator;
-
-    static std::unordered_map<std::string, Menu> menu_lookup;
-    static std::unordered_map<std::string, callback_f> free_lookup;
-    static std::string display_stub_default;
-
     struct private_ctor_t {};
 
   public:
@@ -59,6 +53,8 @@ class Menu {
         return entries.items[idx].callback;
     }
 
+    static std::unordered_map<std::string, Menu> menu_lookup;
+
   private:
     Menu(std::string code, std::string prompt)
         : code(std::move(code)), title(std::move(prompt)) {}
@@ -93,6 +89,9 @@ class Menu {
 
     const std::string code, title;
     Entries entries;
+
+    static std::unordered_map<std::string, callback_f> free_lookup;
+    static std::string display_stub_default;
 };
 
 } // namespace stamen
