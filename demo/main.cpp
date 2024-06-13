@@ -3,8 +3,17 @@
 
 #include <iostream>
 
-// need to link against stamen library in order to use stamen::builtin_display
-const stamen::display_f stamen::stamen_display = stamen::builtin_display;
+int test_display(const char *title, const stamen::item_t itemv[], int size) {
+    for (auto i = 0ul; i < size; i++) {
+        std::cout << i + 1 << ": " << itemv[i].prompt << '\n';
+    }
+    std::cout << "Auto calling option 1...\n";
+    itemv[1].callback(1);
+    return 0;
+}
+
+// no need to link against stamen library as custom display is provided
+const stamen::display_f stamen::stamen_display = test_display;
 
 int operation1(int) {
     std::cout << "operation 1" << std::endl;

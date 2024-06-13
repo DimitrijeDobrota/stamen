@@ -10,14 +10,16 @@ add_custom_command(
 )
 
 add_executable(demo main.cpp ${GENERATE_OUT}/demo_menu.cpp)
-target_link_libraries(demo stamen)
+# target_link_libraries(demo stamen) - no need to link
+target_include_directories(demo PUBLIC ../include)
 set_target_properties(demo PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(demo PRIVATE ${GENERATE_OUT} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set_target_properties(demo PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
-    RUNTIME_OUTPUT_DIRECTORY "${GENERATE_OUT}")
+    RUNTIME_OUTPUT_DIRECTORY "${GENERATE_OUT}"
+)
 
 add_custom_command(
     OUTPUT ${GENERATE_OUT}/demo_menu.h ${GENERATE_OUT}/demo_menu.c

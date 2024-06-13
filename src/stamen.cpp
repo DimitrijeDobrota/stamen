@@ -7,9 +7,11 @@
 #include <ostream>
 #include <variant>
 
+
 namespace stamen {
 
-const display_f &display = stamen_display;
+__attribute__((weak))
+extern const stamen_display_f stamen_display  = stamen_builtin_display;
 
 int dynamic(const char *code) { return Menu::dynamic(code); }
 void read(const char *filename) { Menu::read(filename); }

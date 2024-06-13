@@ -1,8 +1,9 @@
 #include "stamen.hpp"
 #include <iostream>
 
-// need to link against stamen library in order to use stamen::builtin_display
-const stamen::display_f stamen::stamen_display = stamen::builtin_display;
+// still need to link against stamen library
+// as builtin_display is being used
+// because there is no override
 
 int finish(int) { exit(1); }
 

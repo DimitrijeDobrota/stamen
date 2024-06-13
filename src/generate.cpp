@@ -44,7 +44,7 @@ class Generator {
             }
             os << "\t};\n";
 
-            if (cpp) os << "\treturn stamen::display";
+            if (cpp) os << "\treturn stamen::stamen_display";
             else os << "\treturn stamen_display";
 
             os << std::format("(\"{}\"", menu.getTitle());
