@@ -9,6 +9,8 @@
 
 namespace stamen {
 
+const display_f &display = stamen_display;
+
 int dynamic(const char *code) { return Menu::dynamic(code); }
 void read(const char *filename) { Menu::read(filename); }
 void insert(const char *code, callback_f callback) {

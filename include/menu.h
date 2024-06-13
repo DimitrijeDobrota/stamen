@@ -32,6 +32,7 @@ class Menu {
         display_stub_default = code;
         return display_stub(-1);
     };
+
     static void read(const std::string &s);
     static void print(const std::string &entry) { print(entry, 1); }
     static void insert(const std::string &s, callback_f callback) {

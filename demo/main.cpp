@@ -3,9 +3,8 @@
 
 #include <iostream>
 
-// need to link against stamen library
-// in order to use stamen::builtin_display
-const stamen::display_f &stamen::display = stamen::builtin_display;
+// need to link against stamen library in order to use stamen::builtin_display
+const stamen::display_f stamen::stamen_display = stamen::builtin_display;
 
 int operation1(int) {
     std::cout << "operation 1" << std::endl;

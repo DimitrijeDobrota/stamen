@@ -8,6 +8,8 @@
 
 namespace stamen {
 
+const stamen_display_f stamen_display = stamen::builtin_display;
+
 class Generator {
   public:
     static void generateInclude(std::ostream &os, bool cpp) {

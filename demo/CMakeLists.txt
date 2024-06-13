@@ -17,8 +17,7 @@ target_include_directories(demo PRIVATE ${GENERATE_OUT} ${CMAKE_CURRENT_SOURCE_D
 set_target_properties(demo PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
-    RUNTIME_OUTPUT_DIRECTORY "${GENERATE_OUT}"
-)
+    RUNTIME_OUTPUT_DIRECTORY "${GENERATE_OUT}")
 
 add_custom_command(
     OUTPUT ${GENERATE_OUT}/demo_menu.h ${GENERATE_OUT}/demo_menu.c
@@ -40,6 +39,7 @@ set_target_properties(cdemo PROPERTIES
 
 add_executable(dynamic dynamic.cpp)
 target_link_libraries(dynamic stamen)
+set_target_properties(dynamic PROPERTIES LINKER_LANGUAGE CXX)
 
 set_target_properties(dynamic PROPERTIES
     VERSION ${PROJECT_VERSION}

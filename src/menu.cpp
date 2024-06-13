@@ -61,8 +61,7 @@ int Menu::display_stub(int idx) {
     if (ml_it != menu_lookup.end()) {
         const Menu &menu = ml_it->second;
         st.push_back(&menu);
-        int ret = builtin_display(menu.title.c_str(), menu.getItemv(),
-                                  menu.getSize());
+        int ret = display(menu.title.c_str(), menu.getItemv(), menu.getSize());
         st.pop_back();
         return ret;
     }
