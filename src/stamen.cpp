@@ -1,4 +1,4 @@
-#include "stamen.h"
+#include "stamen.hpp"
 #include "menu.h"
 
 #include <cmath>
@@ -7,16 +7,15 @@
 #include <ostream>
 #include <variant>
 
-using namespace stamen;
+namespace stamen {
 
-int stamen_dynamic(const char *code) { return Menu::dynamic(code); }
-void stamen_read(const char *filename) { Menu::read(filename); }
-void stamen_insert(const char *code, stamen_callback_f callback) {
+int dynamic(const char *code) { return Menu::dynamic(code); }
+void read(const char *filename) { Menu::read(filename); }
+void insert(const char *code, callback_f callback) {
   Menu::insert(code, callback);
 }
 
-int stamen_builtin_display(const char *title, const stamen_item_t itemv[],
-                           int size) {
+int builtin_display(const char *title, const item_t itemv[], int size) {
   const size_t digits = size_t(std::log10(size)) + 1;
   const auto items = std::span(itemv, size_t(size));
   int choice = 0;
@@ -56,3 +55,5 @@ int stamen_builtin_display(const char *title, const stamen_item_t itemv[],
 
   return 1;
 }
+
+} // namespace stamen

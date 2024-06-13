@@ -1,12 +1,15 @@
-add_library(stamen-include INTERFACE)
-target_include_directories(stamen-include INTERFACE ../include)
+add_library(stamen STATIC stamen.cpp menu.cpp c_bindings.cpp)
+target_include_directories(stamen PUBLIC ../include)
+target_compile_definitions(stamen PRIVATE WITH_C_BINDINGS)
+set_target_properties(stamen PROPERTIES LINKER_LANGUAGE CXX)
 
-add_library(stamen stamen.cpp menu.cpp)
-target_link_libraries(stamen PUBLIC stamen-include)
 set_target_properties(stamen PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
-    PUBLIC_HEADER ../include/stamen.h
+    DEBUG_POSTFIX "d"
+    PUBLIC_HEADER "../include/stamen.h;../include/stamen.hpp"
+    MACOSX_RPATH ON
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 install(TARGETS stamen

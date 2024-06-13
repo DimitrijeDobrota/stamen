@@ -9,12 +9,9 @@ add_custom_command(
     COMMENT "Generating menu files"
 )
 
-add_executable(demo
-    main.cpp
-    ${GENERATE_OUT}/demo_menu.cpp
-)
-
+add_executable(demo main.cpp ${GENERATE_OUT}/demo_menu.cpp)
 target_link_libraries(demo stamen)
+set_target_properties(demo PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(demo PRIVATE ${GENERATE_OUT} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set_target_properties(demo PROPERTIES
@@ -23,8 +20,6 @@ set_target_properties(demo PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${GENERATE_OUT}"
 )
 
-
-
 add_custom_command(
     OUTPUT ${GENERATE_OUT}/demo_menu.h ${GENERATE_OUT}/demo_menu.c
     COMMAND ${GENERATE_OUT}/stamen-generate ${GENERATE_OUT}/demo_menu.conf c
@@ -32,12 +27,9 @@ add_custom_command(
     COMMENT "Generating cmenu files"
 )
 
-add_executable(cdemo
-    main.c
-    ${GENERATE_OUT}/demo_menu.c
-)
-
+add_executable(cdemo main.c ${GENERATE_OUT}/demo_menu.c)
 target_link_libraries(cdemo stamen)
+set_target_properties(cdemo PROPERTIES LINKER_LANGUAGE C)
 target_include_directories(cdemo PRIVATE ${GENERATE_OUT} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set_target_properties(cdemo PROPERTIES

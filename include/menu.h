@@ -1,7 +1,7 @@
 #ifndef STAMEN_MENU_H
 #define STAMEN_MENU_H
 
-#include "stamen.h"
+#include "stamen.hpp"
 
 #include <cstring>
 #include <iostream>

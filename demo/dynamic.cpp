@@ -1,7 +1,9 @@
+#include "stamen.hpp"
 #include <iostream>
-#include <stamen.h>
 
-const stamen::display_f stamen_display = stamen::builtin_display;
+// need to link against stamen library
+// in order to use stamen::builtin_display
+const stamen::display_f &stamen::display = stamen::builtin_display;
 
 int finish(int) { exit(1); }
 

@@ -10,33 +10,44 @@ namespace stamen {
 
 class Generator {
 public:
-  static void generateInclude(std::ostream &os) {
+  static void generateInclude(std::ostream &os, bool cpp) {
     os << "#ifndef STAMEN_MENU_H\n";
     os << "#define STAMEN_MENU_H\n\n";
-    os << "#include <stamen.h>\n\n";
+
+    if (cpp) os << "#include \"stamen.hpp\"\n\n";
+    else os << "#include \"stamen.h\"\n\n";
+
     for (const auto &[code, menu] : Menu::menu_lookup) {
       os << std::format("int {}(int);\n", menu.getCode());
     }
+
     os << "\n#endif\n";
   }
 
-  static void generateSource(std::ostream &os) {
-    os << "#include <stamen.h>\n";
+  static void generateSource(std::ostream &os, bool cpp) {
+    if (cpp) os << "#include \"stamen.hpp\"\n\n";
+    else os << "#include \"stamen.h\"\n\n";
+
     os << "#include \"shared.h\"\n\n";
     for (const auto &[code, menu] : Menu::menu_lookup) {
       os << std::format("int {}(int) {{\n", menu.getCode());
 
-      os << std::format("\tstatic const stamen_item_t items[] = {{\n");
-      for (int i = 0; i < menu.getSize(); i++) {
-        os << std::format("\t\t{{ {}, \"{}\" }},\n", menu.getCode(i),
-                          menu.getPrompt(i));
-      }
-      os << std::format("\t}};\n");
+      if (cpp) os << "\tstatic const stamen::item_t items[] = ";
+      else os << "\tstatic const stamen_item_t items[] = ";
 
-      os << std::format("\treturn stamen_display(\"{}\", items, "
-                        "sizeof(items) / sizeof(items[0]));\n",
-                        menu.getTitle());
-      os << std::format("}}\n\n");
+      os << "{\n";
+      for (int i = 0; i < menu.getSize(); i++) {
+        os << "\t\t{ " << menu.getCode(i);
+        os << ", \"" << menu.getPrompt(i) << "\" },\n";
+      }
+      os << "\t};\n";
+
+      if (cpp) os << "\treturn stamen::display";
+      else os << "\treturn stamen_display";
+
+      os << std::format("(\"{}\"", menu.getTitle());
+      os << ", items, sizeof(items) / sizeof(items[0]));\n";
+      os << "}\n\n";
     }
   }
 };
@@ -63,8 +74,8 @@ int main(const int argc, const char *argv[]) {
   std::string ext = cpp ? "pp" : "";
 
   std::ofstream source(base + ".c" + ext), include(base + ".h" + ext);
-  Generator::generateSource(source);
-  Generator::generateInclude(include);
+  Generator::generateSource(source, cpp);
+  Generator::generateInclude(include, cpp);
 
   return 0;
 }

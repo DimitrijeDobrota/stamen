@@ -1,5 +1,4 @@
 #include "menu.h"
-#include "stamen.h"
 
 #include <deque>
 #include <format>
