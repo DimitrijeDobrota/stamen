@@ -1,3 +1,5 @@
+#include <args/args.hpp>
+
 #include "menu.h"
 #include "stamen.h"
 
@@ -53,31 +55,64 @@ class Generator {
         }
     }
 };
-
 } // namespace stamen
 
-using namespace stamen;
+struct arguments_t {
+    std::string config;
+    bool cpp = false;
+};
 
-int main(const int argc, const char *argv[]) {
-    const auto args = std::span(argv, size_t(argc));
+int parse_opt(int key, const char *arg, args::Parser *parser) {
+    auto arguments = (arguments_t *)parser->input();
+    switch (key) {
+    case 666: arguments->cpp = false; break;
+    case 777: arguments->cpp = true; break;
+    case args::ARG:
+        if (!arguments->config.empty()) {
+            args::failure(parser, 1, 0, "Too many arguments");
+        }
+        arguments->config = arg;
+        break;
+    case args::NO_ARGS:
+        args::failure(parser, 0, 0, "Missing an argument");
+        args::help(parser, stderr, args::STD_USAGE);
+    }
+    return 0;
+}
 
-    if (argc != 2 && argc != 3) {
-        std::cout << argv[0] << " config_file [c/cpp]" << std::endl;
-        return 1;
+static const args::option_t options[]{
+    {0, 0, 0, 0, "Output mode", 1},
+    {"c", 666, 0, 0, "Generate files for C"},
+    {"cpp", 777, 0, 0, "Generate files for C++"},
+    {0, 0, 0, 0, "Informational Options", -1},
+    {0},
+};
+
+static const args::argp_t argp{
+    options,
+    parse_opt,
+    "config_file",
+    "",
+};
+
+int main(int argc, char *argv[]) {
+    arguments_t arguments;
+    if (args::parse(&argp, argc, argv, 0, &arguments)) {
+        std::cerr << "There was an error while parsing arguments";
+        return 0;
     }
 
-    const bool cpp = argc == 2 || std::string(args[2]) == "cpp";
+    const auto &config = arguments.config;
+    stamen::Menu::read(config);
 
-    std::string path = args[1];
-    Menu::read(path);
-
-    std::string::size_type pos = path.rfind('.');
-    std::string base = pos != std::string::npos ? path.substr(0, pos) : path;
-    std::string ext = cpp ? "pp" : "";
+    std::string::size_type pos = arguments.config.rfind('.');
+    std::string base =
+        pos != std::string::npos ? config.substr(0, pos) : config;
+    std::string ext = arguments.cpp ? "pp" : "";
 
     std::ofstream source(base + ".c" + ext), include(base + ".h" + ext);
-    Generator::generateSource(source, cpp);
-    Generator::generateInclude(include, cpp);
+    stamen::Generator::generateSource(source, arguments.cpp);
+    stamen::Generator::generateInclude(include, arguments.cpp);
 
     return 0;
 }

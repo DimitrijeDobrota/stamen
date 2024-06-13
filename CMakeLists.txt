@@ -44,6 +44,8 @@ foreach(p LIB BIN INCLUDE CMAKE)
 	unset(_path)
 endforeach()
 
+find_package(args 1 CONFIG REQUIRED)
+
 add_subdirectory(src)
 add_subdirectory(demo)
 

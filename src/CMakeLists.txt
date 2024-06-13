@@ -13,7 +13,7 @@ set_target_properties(stamen PROPERTIES
 )
 
 add_executable(stamen-generate generate.cpp)
-target_link_libraries(stamen-generate PRIVATE stamen)
+target_link_libraries(stamen-generate PRIVATE args stamen)
 target_include_directories(stamen-generate PRIVATE ../include)
 
 set_target_properties(stamen-generate PROPERTIES
