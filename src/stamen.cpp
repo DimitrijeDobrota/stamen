@@ -4,8 +4,6 @@
 #include <cmath>
 #include <format>
 #include <iostream>
-#include <ostream>
-#include <variant>
 
 namespace stamen {
 

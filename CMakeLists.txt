@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25.2)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
-    Stamen
+    stamen
     VERSION 1.0.1
     DESCRIPTION "Static menu generator"
     LANGUAGES C CXX
@@ -44,7 +44,7 @@ foreach(p LIB BIN INCLUDE CMAKE)
 	unset(_path)
 endforeach()
 
-find_package(args 1 CONFIG REQUIRED)
+find_package(poafloc 1 CONFIG REQUIRED)
 
 add_subdirectory(src)
 add_subdirectory(demo)

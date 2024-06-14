@@ -1,4 +1,4 @@
-#include <args/args.hpp>
+#include <poafloc/poafloc.hpp>
 
 #include "menu.hpp"
 #include "stamen.hpp"
@@ -16,8 +16,7 @@ struct arguments_t {
     bool user = false;
 } opt;
 
-void generateIncludeHeaders(std::ostream &os) {
-}
+void generateIncludeHeaders(std::ostream &os) {}
 
 void generateInclude(std::ostream &os) {
     os << "#ifndef STAMEN_MENU_H\n";
@@ -63,7 +62,7 @@ void generateSource(std::ostream &os) {
     }
 }
 
-int parse_opt(int key, const char *arg, args::Parser *parser) {
+int parse_opt(int key, const char *arg, poafloc::Parser *parser) {
     auto arguments = (arguments_t *)parser->input();
     switch (key) {
     case 'd': arguments->display = arg; break;
@@ -71,17 +70,17 @@ int parse_opt(int key, const char *arg, args::Parser *parser) {
     case 'u': arguments->user = true; break;
     case 666: arguments->cpp = false; break;
     case 777: arguments->cpp = true; break;
-    case args::ARG:
+    case poafloc::ARG:
         if (!arguments->config.empty()) {
-            args::failure(parser, 0, 0, "Too many arguments");
-            args::help(parser, stderr, args::STD_USAGE);
+            poafloc::failure(parser, 0, 0, "Too many arguments");
+            poafloc::help(parser, stderr, poafloc::STD_USAGE);
         }
         arguments->config = arg;
         break;
-    case args::NO_ARGS:
-        args::failure(parser, 0, 0, "Missing an argument");
-        args::help(parser, stderr, args::STD_USAGE);
-    case args::END:
+    case poafloc::NO_ARGS:
+        poafloc::failure(parser, 0, 0, "Missing an argument");
+        poafloc::help(parser, stderr, poafloc::STD_USAGE);
+    case poafloc::END:
         if (arguments->display.empty()) {
             if (arguments->cpp) arguments->display = "stamen::builtin_display";
             else arguments->display = "stamen_builtin_display";
@@ -91,19 +90,20 @@ int parse_opt(int key, const char *arg, args::Parser *parser) {
     return 0;
 }
 
-static const args::option_t options[]{
+static const poafloc::option_t options[]{
     {0, 0, 0, 0, "Output mode", 1},
     {"c", 666, 0, 0, "Generate files for C"},
     {"cpp", 777, 0, 0, "Generate files for C++"},
     {0, 0, 0, 0, "Output settings", 2},
     {"display", 'd', "FUNC", 0, "Set display function to be called"},
     {"user", 'u', 0, 0, "Include user stamen headers"},
-    {"header", 'h', "FUNC", 0, "Header with free functions, default: shared.h"},
+    {"header", 'h', "FUNC", 0,
+     "Header with free functions, default: shared.h"},
     {0, 0, 0, 0, "Informational Options", -1},
     {0},
 };
 
-static const args::argp_t argp{
+static const poafloc::arg_t arg{
     options,
     parse_opt,
     "config_file",
@@ -111,7 +111,7 @@ static const args::argp_t argp{
 };
 
 int main(int argc, char *argv[]) {
-    if (args::parse(&argp, argc, argv, 0, &opt)) {
+    if (poafloc::parse(&arg, argc, argv, 0, &opt)) {
         std::cerr << "There was an error while parsing arguments";
         return 0;
     }
