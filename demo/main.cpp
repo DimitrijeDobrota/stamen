@@ -1,5 +1,5 @@
 #include "demo_menu.hpp"
-#include "stamen.h"
+#include "stamen.hpp"
 
 #include <iostream>
 

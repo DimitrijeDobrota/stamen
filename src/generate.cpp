@@ -11,25 +11,17 @@
 struct arguments_t {
     std::string config;
     std::string display;
+    std::string header = "shared.h";
     bool cpp = false;
     bool user = false;
 } opt;
 
 void generateIncludeHeaders(std::ostream &os) {
-    if (opt.user) {
-        if (opt.cpp) os << "#include \"stamen.hpp\"\n\n";
-        else os << "#include \"stamen.h\"\n\n";
-    } else {
-        if (opt.cpp) os << "#include <stamen/stamen.hpp>\n\n";
-        else os << "#include <stamen/stamen.h>\n\n";
-    }
 }
 
 void generateInclude(std::ostream &os) {
     os << "#ifndef STAMEN_MENU_H\n";
     os << "#define STAMEN_MENU_H\n\n";
-
-    generateIncludeHeaders(os);
 
     for (const auto &[code, menu] : stamen::menu::menu_lookup) {
         os << std::format("int {}(int);\n", menu.getCode());
@@ -39,8 +31,14 @@ void generateInclude(std::ostream &os) {
 }
 
 void generateSource(std::ostream &os) {
-    os << "#include \"shared.h\"\n";
-    generateIncludeHeaders(os);
+    os << std::format("#include \"{}\"\n", opt.header);
+    if (opt.user) {
+        if (opt.cpp) os << "#include \"stamen.hpp\"\n\n";
+        else os << "#include \"stamen.h\"\n\n";
+    } else {
+        if (opt.cpp) os << "#include <stamen/stamen.hpp>\n\n";
+        else os << "#include <stamen/stamen.h>\n\n";
+    }
 
     os << std::format("extern int {}(const char *title, ", opt.display);
     if (opt.cpp) os << "const stamen::item_t itemv[], int size);\n\n";
@@ -68,13 +66,15 @@ void generateSource(std::ostream &os) {
 int parse_opt(int key, const char *arg, args::Parser *parser) {
     auto arguments = (arguments_t *)parser->input();
     switch (key) {
-    case 'u': arguments->user = true; break;
     case 'd': arguments->display = arg; break;
+    case 'h': arguments->header = arg; break;
+    case 'u': arguments->user = true; break;
     case 666: arguments->cpp = false; break;
     case 777: arguments->cpp = true; break;
     case args::ARG:
         if (!arguments->config.empty()) {
-            args::failure(parser, 1, 0, "Too many arguments");
+            args::failure(parser, 0, 0, "Too many arguments");
+            args::help(parser, stderr, args::STD_USAGE);
         }
         arguments->config = arg;
         break;
@@ -98,6 +98,7 @@ static const args::option_t options[]{
     {0, 0, 0, 0, "Output settings", 2},
     {"display", 'd', "FUNC", 0, "Set display function to be called"},
     {"user", 'u', 0, 0, "Include user stamen headers"},
+    {"header", 'h', "FUNC", 0, "Header with free functions, default: shared.h"},
     {0, 0, 0, 0, "Informational Options", -1},
     {0},
 };
