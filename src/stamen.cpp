@@ -7,7 +7,6 @@
 #include <ostream>
 #include <variant>
 
-
 namespace stamen {
 
 void read(const char *filename) { Menu::read(filename); }
@@ -21,15 +20,14 @@ int dynamic(const char *code, display_f display) {
 }
 
 int builtin_display(const char *title, const item_t itemv[], int size) {
-    const size_t digits = size_t(std::log10(size)) + 1;
     const auto items = std::span(itemv, size_t(size));
+    const size_t dgts = size_t(std::log10(size)) + 1;
     int choice = 0;
 
     while (true) {
         std::cout << std::format("{}:\n", title);
         for (auto i = 0ul; i < size; i++) {
-            std::cout << std::format(" {:{}}. {}\n", i, digits,
-                                     items[i].prompt);
+            std::cout << std::format(" {:{}}. {}\n", i, dgts, items[i].prompt);
         }
 
         while (true) {
@@ -40,20 +38,18 @@ int builtin_display(const char *title, const item_t itemv[], int size) {
                     return 1;
                 }
 
-                std::cout << std::format("Choice: {}\n\n",
-                                         items[choice].prompt);
+                std::cout << "Choice: " << items[choice].prompt << "\n\n";
                 const int res = items[choice].callback(choice);
-                if (res > 1) return res - 1;
-                else break;
 
+                if (res < 2) break;
+                return res - 1;
             } else if (std::cin.eof()) {
                 std::cerr << "encountered end of input!\n";
                 return std::numeric_limits<int>::max();
-            } else {
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(),
-                                '\n');
             }
+
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Invalid option, please choose again!\n";
         }
         std::cout << std::endl;
