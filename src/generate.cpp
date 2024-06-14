@@ -97,7 +97,7 @@ static const poafloc::option_t options[]{
     {0, 0, 0, 0, "Output settings", 2},
     {"display", 'd', "FUNC", 0, "Set display function to be called"},
     {"user", 'u', 0, 0, "Include user stamen headers"},
-    {"header", 'h', "FUNC", 0,
+    {"header", 'h', "NAME", 0,
      "Header with free functions, default: shared.h"},
     {0, 0, 0, 0, "Informational Options", -1},
     {0},
