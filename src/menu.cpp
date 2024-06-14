@@ -1,4 +1,4 @@
-#include "menu.h"
+#include "menu.hpp"
 
 #include <deque>
 #include <format>
@@ -9,36 +9,16 @@
 #include <utility>
 
 namespace stamen {
+namespace menu {
 
-std::unordered_map<std::string, Menu> Menu::menu_lookup;
-std::unordered_map<std::string, callback_f> Menu::free_lookup;
-std::string Menu::display_stub_default;
-display_f Menu::display;
+std::unordered_map<std::string, menu_t> menu_lookup;
+std::unordered_map<std::string, callback_f> free_lookup;
+std::string display_stub_default;
+display_f display;
 
-void Menu::entries_t::insert(const std::string &code,
-                             const std::string &prompt, callback_f callback) {
-    char *buffer = new char[prompt.size() + 1];
-    strcpy(buffer, prompt.c_str());
-
-    items.emplace_back(callback, buffer);
-    codes.emplace_back(code, prompt);
-}
-
-const std::string &Menu::getCode(std::size_t idx) const {
-    return entries.codes[idx].code;
-}
-
-const std::string &Menu::getPrompt(std::size_t idx) const {
-    return entries.codes[idx].prompt;
-}
-
-callback_f Menu::getCallback(std::size_t idx) const {
-    return entries.items[idx].callback;
-}
-
-void Menu::read(const std::string &s) {
+void read(const char *filename) {
     std::string line, delim, code, prompt;
-    std::fstream fs(s);
+    std::fstream fs(filename);
 
     auto last = menu_lookup.end();
     while (std::getline(fs, line)) {
@@ -48,28 +28,40 @@ void Menu::read(const std::string &s) {
         ss >> delim >> code >> std::ws;
         std::getline(ss, prompt);
 
-        if (delim != "+") last->second.entries.insert(code, prompt);
+        if (delim != "+") last->second.insert(code, prompt);
         else {
             const auto [iter, succ] = menu_lookup.emplace(
                 std::piecewise_construct, std::forward_as_tuple(code),
-                std::forward_as_tuple(private_ctor_t{}, code, prompt));
+                std::forward_as_tuple(menu_t::private_ctor_t{}, code, prompt));
             last = iter;
         }
     }
 }
 
-int Menu::display_stub(int idx) {
-    static std::deque<const Menu *> st;
+void insert(const char *code, callback_f callback) {
+    free_lookup.emplace(code, callback);
+}
+
+int dynamic(const char *code, display_f display) {
+    menu::display_stub_default = code;
+    menu::display = display;
+    return display_stub(-1);
+}
+
+int display_stub(int idx) {
+    static std::deque<const menu_t *> st;
 
     const std::string &code =
         !st.empty() ? st.back()->getCode(idx) : display_stub_default;
 
     const auto ml_it = menu_lookup.find(code);
     if (ml_it != menu_lookup.end()) {
-        const Menu &menu = ml_it->second;
-        st.push_back(&menu);
-        int ret = display(menu.title.c_str(), menu.getItemv(), menu.getSize());
+        const auto &m = ml_it->second;
+
+        st.push_back(&m);
+        int ret = display(m.getTitle().c_str(), m.getItemv(), m.getSize());
         st.pop_back();
+
         return ret;
     }
 
@@ -80,4 +72,14 @@ int Menu::display_stub(int idx) {
     return 1;
 }
 
+void menu_t::insert(const std::string &code, const std::string &prompt,
+                    callback_f callback) {
+    char *buffer = new char[prompt.size() + 1];
+    strcpy(buffer, prompt.c_str());
+
+    items.emplace_back(callback, buffer);
+    codes.emplace_back(code, prompt);
+}
+
+} // namespace menu
 } // namespace stamen

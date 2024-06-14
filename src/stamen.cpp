@@ -9,16 +9,6 @@
 
 namespace stamen {
 
-void read(const char *filename) { Menu::read(filename); }
-
-void insert(const char *code, callback_f callback) {
-    Menu::insert(code, callback);
-}
-
-int dynamic(const char *code, display_f display) {
-    return Menu::dynamic(code, display);
-}
-
 int builtin_display(const char *title, const item_t itemv[], int size) {
     const auto items = std::span(itemv, size_t(size));
     const size_t dgts = size_t(std::log10(size)) + 1;

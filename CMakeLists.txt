@@ -70,14 +70,10 @@ install(
 )
 
 install(
-	EXPORT
-		stamenTargets
-	NAMESPACE
-		"stamen::"
-	DESTINATION
-		${INSTALL_CMAKEDIR}
-	COMPONENT
-		dev
+	EXPORT stamenTargets
+	NAMESPACE "stamen::"
+	DESTINATION ${INSTALL_CMAKEDIR}
+	COMPONENT dev
 )
 
 include(CMakePackageConfigHelpers)

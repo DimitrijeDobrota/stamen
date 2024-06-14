@@ -7,7 +7,7 @@ set_target_properties(stamen PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
     DEBUG_POSTFIX "d"
-    PUBLIC_HEADER "include/stamen.h;include/stamen.hpp"
+    PUBLIC_HEADER "include/stamen.h;include/stamen.hpp;include/menu.h;include/menu.hpp"
     MACOSX_RPATH ON
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )

@@ -1,7 +1,7 @@
 #include <args/args.hpp>
 
-#include "menu.h"
-#include "stamen.h"
+#include "menu.hpp"
+#include "stamen.hpp"
 
 #include <format>
 #include <fstream>
@@ -31,7 +31,7 @@ void generateInclude(std::ostream &os) {
 
     generateIncludeHeaders(os);
 
-    for (const auto &[code, menu] : stamen::Menu::menu_lookup) {
+    for (const auto &[code, menu] : stamen::menu::menu_lookup) {
         os << std::format("int {}(int);\n", menu.getCode());
     }
 
@@ -46,7 +46,7 @@ void generateSource(std::ostream &os) {
     if (opt.cpp) os << "const stamen::item_t itemv[], int size);\n\n";
     else os << "const stamen_item_t itemv[], int size);\n\n";
 
-    for (const auto &[code, menu] : stamen::Menu::menu_lookup) {
+    for (const auto &[code, menu] : stamen::menu::menu_lookup) {
         os << std::format("int {}(int) {{\n", menu.getCode());
 
         if (opt.cpp) os << "\tstatic const stamen::item_t items[] = ";
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
     }
 
     const auto &config = opt.config;
-    stamen::Menu::read(config);
+    stamen::menu::read(config.c_str());
 
     std::string::size_type pos = opt.config.rfind('.');
     std::string base =
