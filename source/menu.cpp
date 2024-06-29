@@ -90,7 +90,7 @@ void menu_t::insert(const std::string& code,
                     callback_f callback)
 {
   char* buffer = new char[prompt.size() + 1];  // NOLINT
-  strcpy(buffer, prompt.c_str()); // NOLINT
+  strcpy(buffer, prompt.c_str());  // NOLINT
 
   m_items.emplace_back(callback, buffer);
   m_codes.emplace_back(code, prompt);

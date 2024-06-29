@@ -22,7 +22,7 @@ The main advantage of stamen is two modes it can operate in:
 ## Dependencies
 
 * CMake 3.25.2 or latter
-* Compiler with C++20 support
+* Compiler with C++20 support (tested: clang 16.0.5, gcc 13.2.0)
 * [Poafloc 1.1](https://github.com/DimitrijeDobrota/poafloc)
 
 
