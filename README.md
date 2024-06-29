@@ -1,7 +1,6 @@
-# Stamen
+# stamen
 
 Static menu generator written in C++20
-
 
 ## Description
 
@@ -20,23 +19,34 @@ The main advantage of stamen is two modes it can operate in:
 2) Dynamic mode, where menus are generated on the fly (possibly in runtime) without recompilation.
 
 
-## Getting Started
-
-### Dependencies
+## Dependencies
 
 * CMake 3.25.2 or latter
 * Compiler with C++20 support
-* [Poafloc Library](https://github.com/DimitrijeDobrota/poafloc)
+* [Poafloc 1.1](https://github.com/DimitrijeDobrota/poafloc)
 
 
-### Installing
+## Building and installing
 
-* Clone the repo
-* Make a build folder and cd into it
-* Run `cmake <path to cloned repo>` to set up the build scripts
-* Run `make` to build the project
-* Run `cmake --build . --target install` to install the project
+See the [BUILDING](BUILDING.md) document.
 
+
+## Usage
+
+> Please reference example folder for relevant usage example.
+
+> Refer to example/CMakeLists.txt to see how to integrate stamen into build system
+
+There are a few things needed before you begin.
+
+* All types and functions with prefixes `stamen_` and `stamen_menu_` are also
+available in namespaces `stamen::` and `stamen::menu::` in C++ for easier use.
+* Panel and item codes must be one word. In addition they must be valid C/C++
+function names if static menu is to be build correctly.
+* Each free function must have `int name(int);` signature as prescribed by
+`stamen_callback_f`. Passed int it is intended to detonate the position of an
+item in the previous panel which is essential for dynamic menu implementation,
+but it is not required to be used like that.
 
 ### Configuration
 
@@ -74,29 +84,11 @@ reference to another panel or any other function (from now on referred to as
 `free function`).
 
 
-### Usage
+### Static menu
 
-> Please reference demo folder for relevant usage example.
+> Please refer to `stamen --help` for list of all options
 
-> Refer to demo/CMakeLists.txt to see how to integrate stamen into build system
-
-There are a few things needed before you begin.
-
-* All types and functions with prefixes `stamen_` and `stamen_menu_` are also
-available in namespaces `stamen::` and `stamen::menu::` in C++ for easier use.
-* Panel and item codes must be one word. In addition they must be valid C/C++
-function names if static menu is to be build correctly.
-* Each free function must have `int name(int);` signature as prescribed by
-`stamen_callback_f`. Passed int it is intended to detonate the position of an
-item in the previous panel which is essential for dynamic menu implementation,
-but it is not required to be used like that.
-
-
-#### Static menu
-
-> Please refer to `stamen-generate --help` for list of all options
-
-After writing a configuration file, run `stamen-generate <config file>` which
+After writing a configuration file, run `stamen <config file>` which
 will create source file and include file in the current directory with the name
 as the configuration file but with extensions `.cpp` and `.hpp` respectively.
 You can create  files with extensions `.c` and `.h` by appending adding `--c`
@@ -120,7 +112,7 @@ Generated source file should be compiled with the rest of your code. If
 You can call any function to display the menu starting from that specific pane.
 
 
-#### Custom display function
+### Custom display function
 
 Please refer to the implementation of `stamen_builtin_display` to get a general
 idea of the direction.
@@ -135,7 +127,7 @@ measure how many panels back should be backtracked after a free function
 terminates, but you can use in any way you see fit.
 
 
-#### Dynamic menu
+### Dynamic menu
 
 In dynamic mode, configuration file is read every time the program is run. In
 order to invoke the menu you need to add the following snippet to your C
@@ -177,6 +169,10 @@ written in C or C++.
 
 ## Version History
 
+- 1.2
+    * Modernize CMake project
+    * Modernize codebase
+
 - 1.1
     * Separate C and C++ interfaces
     * Separate dynamic mode into menu namespace
@@ -188,7 +184,14 @@ written in C or C++.
     * Initial Release
 
 
+## Contributing
+
+See the [CONTRIBUTING](CONTRIBUTING.md) document.
+
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details
+This project is licensed under the MIT License -
+see the [LICENSE](LICENSE.md) file for details
+
 

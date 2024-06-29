@@ -1,99 +1,101 @@
-cmake_minimum_required(VERSION 3.25.2)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+cmake_minimum_required(VERSION 3.14)
+
+include(cmake/prelude.cmake)
 
 project(
     stamen
-    VERSION 1.1.0
+    VERSION 1.1.1
     DESCRIPTION "Static menu generator"
+    HOMEPAGE_URL "https://git.dimitrijedobrota.com/stamen"
     LANGUAGES C CXX
 )
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+include(cmake/project-is-top-level.cmake)
+include(cmake/variables.cmake)
 
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+find_package(poafloc 1.1 CONFIG REQUIRED)
 
-if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+# ---- Declare library ----
+
+add_library(
+    stamen_stamen
+    source/stamen.cpp
+    source/menu.cpp
+    source/c_bindings.cpp
+)
+target_link_libraries(stamen_stamen PUBLIC poafloc::poafloc)
+add_library(stamen::stamen ALIAS stamen_stamen)
+
+include(GenerateExportHeader)
+generate_export_header(
+    stamen_stamen
+    BASE_NAME stamen
+    EXPORT_FILE_NAME export/stamen/stamen_export.hpp
+    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
+)
+
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(stamen_stamen PUBLIC STAMEN_STATIC_DEFINE)
 endif()
 
-include(GNUInstallDirs)
+set_target_properties(
+    stamen_stamen PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+    VERSION "${PROJECT_VERSION}"
+    SOVERSION "${PROJECT_VERSION_MAJOR}"
+    EXPORT_NAME stamen
+    OUTPUT_NAME stamen
+)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
+target_include_directories(
+    stamen_stamen ${warning_guard}
+    PUBLIC
+    "\$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+)
 
-set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory for libraries")
-set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Installation directory for executables")
-set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for header files")
-if(WIN32 AND NOT CYGWIN)
-	set(DEF_INSTALL_CMAKEDIR CMake)
-else()
-	set(DEF_INSTALL_CMAKEDIR share/cmake/${PROJECT_NAME})
+target_include_directories(
+    stamen_stamen SYSTEM
+    PUBLIC
+    "\$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
+)
+
+target_compile_features(stamen_stamen PUBLIC cxx_std_20)
+
+# ---- Declare executable ----
+
+add_executable(stamen_exe source/generate.cpp)
+add_executable(stamen::exe ALIAS stamen_exe)
+
+target_link_libraries(stamen_exe PRIVATE stamen::stamen)
+set_property(TARGET stamen_exe PROPERTY OUTPUT_NAME stamen)
+
+target_compile_features(stamen_exe PRIVATE cxx_std_20)
+
+# ---- Install rules ----
+
+if(NOT CMAKE_SKIP_INSTALL_RULES)
+  include(cmake/install-rules.cmake)
 endif()
-set(INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
 
-message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
-message(STATUS "Project will be installed to ${CMAKE_INSTALL_PREFIX}")
-foreach(p LIB BIN INCLUDE CMAKE)
-	file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${p}DIR} _path)
-	message(STATUS "installing ${p} components to ${_path}")
-	unset(_path)
-endforeach()
+# ---- Examples ----
 
-find_package(poafloc 1 CONFIG REQUIRED)
+if(PROJECT_IS_TOP_LEVEL)
+  option(BUILD_EXAMPLES "Build examples tree." "${stamen_DEVELOPER_MODE}")
+  if(BUILD_EXAMPLES)
+    add_subdirectory(example)
+  endif()
+endif()
 
-add_subdirectory(src)
-add_subdirectory(demo)
+# ---- Developer mode ----
 
-install(
-	TARGETS
-        stamen-generate
-		stamen
-	EXPORT
-		stamenTargets
-	ARCHIVE
-		DESTINATION ${INSTALL_LIBDIR}
-		COMPONENT lib
-	RUNTIME
-		DESTINATION ${INSTALL_BINDIR}
-		COMPONENT bin
-	LIBRARY
-		DESTINATION ${INSTALL_LIBDIR}
-		COMPONENT lib
-	PUBLIC_HEADER
-		DESTINATION ${INSTALL_INCLUDEDIR}/stamen
-		COMPONENT dev
-)
+if(NOT stamen_DEVELOPER_MODE)
+  return()
+elseif(NOT PROJECT_IS_TOP_LEVEL)
+  message(
+      AUTHOR_WARNING
+      "Developer mode is intended for developers of stamen"
+  )
+endif()
 
-install(
-	EXPORT stamenTargets
-	NAMESPACE "stamen::"
-	DESTINATION ${INSTALL_CMAKEDIR}
-	COMPONENT dev
-)
-
-include(CMakePackageConfigHelpers)
-
-write_basic_package_version_file(
-	${CMAKE_CURRENT_BINARY_DIR}/stamenConfigVersion.cmake
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY SameMajorVersion
-)
-
-configure_package_config_file(
-	${PROJECT_SOURCE_DIR}/stamenConfig.cmake.in
-	${CMAKE_CURRENT_BINARY_DIR}/stamenConfig.cmake
-	INSTALL_DESTINATION ${INSTALL_CMAKEDIR}
-)
-
-install(
-	FILES
-		${CMAKE_CURRENT_BINARY_DIR}/stamenConfig.cmake
-		${CMAKE_CURRENT_BINARY_DIR}/stamenConfigVersion.cmake
-	DESTINATION
-		${INSTALL_CMAKEDIR}
-)
+include(cmake/dev-mode.cmake)
