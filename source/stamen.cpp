@@ -2,13 +2,15 @@
 #include <format>
 #include <iostream>
 
-#include "stamen/stamen.hpp"
+#include "stamen/stamen.h"
 
-#include "stamen/menu.h"
-
+extern "C"
+{
 namespace stamen {
 
-int builtin_display(const char* title, const item_t itemv[], size_t size)
+int builtin_display(const char* title,
+                    const stamen_item_t itemv[],
+                    size_t size)
 {
   const auto items  = std::span(itemv, size);
   const size_t dgts = static_cast<size_t>(std::log10(size)) + 1;
@@ -59,3 +61,4 @@ int builtin_display(const char* title, const item_t itemv[], size_t size)
 }
 
 }  // namespace stamen
+}

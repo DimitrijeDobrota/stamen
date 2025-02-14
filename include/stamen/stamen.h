@@ -26,6 +26,11 @@ typedef int (*stamen_display_f)(const char*,  // NOLINT
 int stamen_builtin_display(const char* title,
                            const stamen_item_t itemv[],
                            size_t size);
+#else
+
+int builtin_display(const char* title,
+                    const stamen_item_t itemv[],
+                    size_t size);
 
 #endif
 

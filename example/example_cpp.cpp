@@ -1,52 +1,57 @@
+#include <cstddef>
 #include <iostream>
-#include <span>
 
 #include "demo_menu.hpp"
-#include "stamen/stamen.hpp"
 
-int test_display(const char* title, const stamen::item_t itemv[], size_t size)
+namespace example {
+
+int menu_t::visit(const menu_t& menu)
 {
-  const auto items = std::span(itemv, itemv + size);
-
-  std::cout << title << std::endl;
-  for (auto i = 0UL; i < size; i++)
+  std::cout << menu.title << '\n';
+  for (auto i = 0UL; i < menu.items.size(); i++)
   {
-    std::cout << i + 1 << ": " << items[i].prompt << '\n';
+    std::cout << i + 1 << ": " << menu.items[i].prompt << '\n';
   }
   std::cout << "Auto calling option 1...\n";
-  items[1].callback(1);
+  menu.items[1].callback(1);
   return 0;
 }
 
-int operation1(size_t /* unused */)
+int operation1(std::size_t /* unused */)  // NOLINT
 {
-  std::cout << "operation 1" << std::endl;
-  std::cout << "Some operation is done" << std::endl;
+  std::cout << "operation 1\n\n";
+  std::cout << "Some operation is done\n\n";
+  std::cout << std::flush;
   return 1;
 }
 
-int operation2(size_t /* unused */)
+int operation2(std::size_t /* unused */)  // NOLINT
 {
-  std::cout << "operation 2" << std::endl;
-  std::cout << "Some other operation is done" << std::endl;
+  std::cout << "operation 2\n";
+  std::cout << "Some other operation is done\n";
+  std::cout << std::flush;
   return 1;
 }
 
-int operation3(size_t /* unused */)
+int operation3(std::size_t /* unused */)  // NOLINT
 {
-  std::cout << "operation 3" << std::endl;
-  std::cout << "Yet another operation is done" << std::endl;
+  std::cout << "operation 3\n";
+  std::cout << "Yet another operation is done\n";
+  std::cout << std::flush;
   return 1;
 }
 
-int finish(size_t /* unused */)
+int finish(std::size_t /* unused */)  // NOLINT
 {
-  std::cout << "finishing..." << std::endl;
+  std::cout << "finishing...\n";
+  std::cout << std::flush;
   exit(0);
 }
 
+}  // namespace example
+
 int main()
 {
-  menu_main(0);
+  example::menu_main(0);
   return 0;
 }

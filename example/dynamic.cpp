@@ -1,28 +1,33 @@
+#include <cstddef>
 #include <iostream>
 #include <span>
 
 #include "stamen/menu.hpp"
+#include "stamen/stamen.h"
 
-int finish(size_t /* unused */)
+int finish(std::size_t /* unused */)  // NOLINT
 {
   exit(0);
 }
 
-int operation1(size_t /* unused */)
+int operation1(std::size_t /* unused */)  // NOLINT
 {
-  std::cout << "1" << std::endl;
+  std::cout << "1\n";
+  std::cout << std::flush;
   return 1;
 }
 
-int operation2(size_t /* unused */)
+int operation2(std::size_t /* unused */)  // NOLINT
 {
-  std::cout << "2" << std::endl;
+  std::cout << "2\n";
+  std::cout << std::flush;
   return 1;
 }
 
-int operation3(size_t /* unused */)
+int operation3(std::size_t /* unused */)  // NOLINT
 {
-  std::cout << "3" << std::endl;
+  std::cout << "3\n";
+  std::cout << std::flush;
   return 1;
 }
 

@@ -1,9 +1,9 @@
 #include <deque>
-#include <format>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <tuple>
+#include <unordered_set>
 #include <utility>
 
 #include "stamen/menu.hpp"
@@ -19,6 +19,7 @@ display_f display;
 
 void read(const char* filename)
 {
+  std::unordered_set<std::string> refd;
   std::fstream fst(filename);
   std::string line;
   std::string delim;
@@ -34,7 +35,11 @@ void read(const char* filename)
     iss >> delim >> code >> std::ws;
     std::getline(iss, prompt);
 
-    if (delim != "+") last->second.insert(code, prompt);
+    if (delim != "+")
+    {
+      last->second.insert(code, prompt);
+      refd.insert(code);
+    }
     else
     {
       const auto [iter, succ] = menu_lookup.emplace(
@@ -44,10 +49,24 @@ void read(const char* filename)
       last = iter;
     }
   }
+
+  for (const auto& ref : refd)
+  {
+    if (!menu_lookup.contains(ref))
+    {
+      free_lookup.emplace(ref, nullptr);
+    }
+  }
 }
 
 void insert(const char* code, callback_f callback)
 {
+  auto itr = free_lookup.find(code);
+  if (itr == free_lookup.end())
+  {
+    std::cout << "Stamen: unknown callback registration...\n" << std::flush;
+    return;
+  }
   free_lookup.emplace(code, callback);
 }
 
@@ -81,7 +100,7 @@ int display_stub(std::size_t idx)
   const auto fl_it = free_lookup.find(code);
   if (fl_it != free_lookup.end()) return fl_it->second(0);
 
-  std::cout << "Stamen: nothing to do..." << std::endl;
+  std::cout << "Stamen: nothing to do...\n" << std::flush;
   return 1;
 }
 

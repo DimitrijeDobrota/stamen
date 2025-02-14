@@ -1,16 +1,19 @@
 #pragma once
 
 #include <cstring>
-#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include "stamen/stamen.hpp"
+#include "stamen/stamen.h"
 
 namespace stamen::menu {
 
 class menu_t;
+
+using callback_f = stamen_callback_f;
+using display_f  = stamen_display_f;
+using item_t = stamen_item_t;
 
 // NOLINTBEGIN
 extern std::unordered_map<std::string, callback_f> free_lookup;

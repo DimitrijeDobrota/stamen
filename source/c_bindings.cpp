@@ -1,9 +1,12 @@
 #include "stamen/menu.hpp"
-#include "stamen/stamen.hpp"
 
 extern "C"
 {
 namespace stamen {
+
+int builtin_display(const char* title,
+                    const menu::item_t itemv[],
+                    size_t size);
 
 int stamen_builtin_display(const char* title,
                            const stamen_item_t itemv[],
@@ -18,12 +21,12 @@ namespace stamen::menu {
 
 void stamen_menu_read(const char* filename)
 {
-  return read(filename);
+  read(filename);
 }
 
 void stamen_menu_insert(const char* code, stamen_callback_f callback)
 {
-  return insert(code, callback);
+  insert(code, callback);
 }
 
 int stamen_menu_dynamic(const char* code, stamen_display_f disp)
