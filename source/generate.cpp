@@ -87,6 +87,7 @@ void generate_include_cpp(std::ostream& ost, const arguments_t& args)
   ost << R"(
 struct menu_t {
   std::string title;
+  stamen::callback_f callback;
   std::vector<stamen::item_t> items;
 
   static int visit(const menu_t& menu);
@@ -128,7 +129,8 @@ void generate_source_cpp(std::ostream& ost,
 
     ost << "\tstatic const menu_t menu = {\n";
     ost << std::format("\t\t.title = \"{}\",\n", menu.get_title());
-    ost << "\t\t.items = {\n";
+    ost << std::format("\t\t.callback = {},\n", menu.get_code());
+    ost << std::format("\t\t.items = {{\n");
     for (auto i = 0UL; i < menu.get_size(); i++)
     {
       ost << std::format("\t\t\t{{.callback = {}, .prompt = \"{}\"}},\n",
