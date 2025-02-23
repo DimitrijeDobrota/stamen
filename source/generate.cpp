@@ -3,7 +3,9 @@
 #include <iostream>
 #include <string>
 
-#include "poafloc/poafloc.hpp"
+#include <cemplate/cemplate.hpp>
+#include <poafloc/poafloc.hpp>
+
 #include "stamen/menu.hpp"
 
 struct arguments_t
@@ -17,29 +19,46 @@ struct arguments_t
 
 namespace {
 
+auto accumulate_items(const stamen::menu::menu_t& lmenu)
+{
+  using namespace cemplate;  // NOLINT
+
+  initlist items; for (auto i = 0UL; i < lmenu.get_size(); i++)
+  {
+    items.emplace_back(initlist({
+        lmenu.get_code(i),
+        string(lmenu.get_prompt(i)),
+    }));
+  }
+
+  return initlist_elem(items);
+}
+
 void generate_include_c(std::ostream& ost, const arguments_t& args)
 {
-  ost << "#ifndef STAMEN_MENU_H\n";
-  ost << "#define STAMEN_MENU_H\n\n";
+  using namespace cemplate;  // NOLINT
+
+  ost << pragma_once();
 
   for (const auto& [code, menu] : stamen::menu::menu_lookup)
   {
-    ost << std::format("int {}(size_t /* unused */);\n", menu.get_code());
+    ost << func_decl(menu.get_code(), "int", {{"size_t", "/* unused */"}});
   }
 
-  ost << "\n#endif\n";
   (void)args;
 }
 
 void generate_source_c(std::ostream& ost, const arguments_t& args)
 {
+  using namespace cemplate;  // NOLINT
+
   if (args.user)
   {
-    ost << "#include \"stamen.h\"\n\n";
+    ost << include("stamen.h", true);
   }
   else
   {
-    ost << "#include <stamen/stamen.h>\n\n";
+    ost << include("stamen/stamen.h");
   }
 
   ost << std::format("extern int {}(const char *title, ", args.display);
@@ -73,22 +92,30 @@ void generate_source_c(std::ostream& ost, const arguments_t& args)
 
 void generate_include_cpp(std::ostream& ost, const arguments_t& args)
 {
-  ost << "#pragma once\n\n";
+  using namespace cemplate;  // NOLINT
 
-  ost << "#include <cstddef>\n";
-  ost << "#include <string>\n";
-  ost << "#include <vector>\n\n";
+  ost << pragma_once();
 
-  ost << (args.user ? "#include \"stamen.hpp\"\n\n"
-                    : "#include <stamen/stamen.hpp>\n\n");
+  ost << include("cstddef");
+  ost << include("functional");
+  ost << include("string");
+  ost << include("vector");
+  ost << '\n';
 
-  ost << std::format("namespace {}\n{{\n", args.nspace);
+  ost << nspace(args.nspace);
 
   ost << R"(
 struct menu_t {
+  using callback_f = std::function<int(std::size_t)>;
+
+  struct item_t {
+    callback_f callback;
+    std::string prompt;
+  };
+
   std::string title;
-  stamen::callback_f callback;
-  std::vector<stamen::item_t> items;
+  callback_f callback;
+  std::vector<item_t> items;
 
   static int visit(const menu_t& menu);
 };
@@ -97,54 +124,50 @@ struct menu_t {
 
   for (const auto& [code, menu] : stamen::menu::menu_lookup)
   {
-    ost << std::format("int {}(std::size_t /* unused */);\n", menu.get_code());
+    ost << func_decl(
+        menu.get_code(), "int", {{"std::size_t", "/* unused */"}});
   }
 
-  ost << std::format("\n}} // namespace {}\n", args.nspace);
+  ost << nspace(args.nspace);
 }
 
 void generate_source_cpp(std::ostream& ost,
                          const arguments_t& args,
-                         const std::string& include)
+                         const std::string& include_name)
 {
-  ost << "#include <cstddef>\n\n";
+  using namespace cemplate;  // NOLINT
 
-  ost << std::format("#include \"{}\"\n\n", include);
+  ost << include(include_name, true);
+  ost << '\n';
 
-  ost << std::format("namespace {}\n{{\n\n", args.nspace);
-
-  ost << std::format("extern int {}(const char *title, ", args.display);
-  ost << "const stamen::item_t itemv[], size_t size);\n\n";
+  ost << nspace(args.nspace);
 
   for (const auto& [code, _] : stamen::menu::free_lookup)
   {
-    ost << std::format("extern int {}(std::size_t);\n", code);
+    ost << func_decl(code, "extern int", {{"std::size_t", "/* unused */"}});
   }
   ost << '\n';
 
+  // clang-format off
   for (const auto& [code, menu] : stamen::menu::menu_lookup)
   {
-    ost << std::format("int {}(size_t /* unused */) //  NOLINT\n{{\n",
-                       menu.get_code());
-
-    ost << "\tstatic const menu_t menu = {\n";
-    ost << std::format("\t\t.title = \"{}\",\n", menu.get_title());
-    ost << std::format("\t\t.callback = {},\n", menu.get_code());
-    ost << std::format("\t\t.items = {{\n");
-    for (auto i = 0UL; i < menu.get_size(); i++)
-    {
-      ost << std::format("\t\t\t{{.callback = {}, .prompt = \"{}\"}},\n",
-                         menu.get_code(i),
-                         menu.get_prompt(i));
-    }
-    ost << "\t\t}\n\t};\n\n";
-
-    ost << "\treturn menu_t::visit(menu);\n";
-
-    ost << "}\n\n";
+    ost << func(
+            menu.get_code(),
+            "extern int",
+            {{"std::size_t", "/* unused */"}}
+        )
+        << decl("static const menu_t", "menu")
+        << initlist({
+               string(menu.get_title()),
+               menu.get_code(),
+               accumulate_items(menu),
+           })
+        << ret("menu_t::visit(menu)")
+        << func(menu.get_code());
   }
+  // clang-format on
 
-  ost << std::format("\n}} // namespace {}\n", args.nspace);
+  ost << nspace(args.nspace);
 }
 
 int parse_opt(int key, const char* arg, poafloc::Parser* parser)

@@ -22,6 +22,7 @@ Checks: "*,\
   -llvm-include-order,\
   -misc-no-recursion,\
   -misc-non-private-member-variables-in-classes,\
+  -modernize-use-designated-initializers,\
   -modernize-use-nodiscard,\
   -modernize-use-trailing-return-type,\
   -readability-function-cognitive-complexity,\
