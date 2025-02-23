@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace stamen::menu {
+namespace stamen {
 
 class menu_t;
 
@@ -86,4 +86,4 @@ private:
   std::vector<item_t> m_items;
 };
 
-}  // namespace stamen::menu
+}  // namespace stamen

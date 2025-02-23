@@ -6,7 +6,7 @@
 #include <cemplate/cemplate.hpp>
 #include <poafloc/poafloc.hpp>
 
-#include "stamen/menu.hpp"
+#include "stamen/stamen.hpp"
 
 struct arguments_t
 {
@@ -16,7 +16,7 @@ struct arguments_t
 
 namespace {
 
-auto accumulate_items(const stamen::menu::menu_t& lmenu)
+auto accumulate_items(const stamen::menu_t& lmenu)
 {
   using namespace cemplate;  // NOLINT
 
@@ -67,13 +67,13 @@ struct menu_t
 )";
 
   ost << "// generated function\n";
-  for (const auto& [code, _] : stamen::menu::menu_lookup)
+  for (const auto& [code, _] : stamen::menu_lookup)
   {
     ost << func_decl(code, "int", {{"std::size_t", "/* unused */"}});
   }
 
   ost << "\n// free function\n";
-  for (const auto& [code, _] : stamen::menu::free_lookup)
+  for (const auto& [code, _] : stamen::free_lookup)
   {
     ost << func_decl(code, "int", {{"std::size_t", "/* unused */"}});
   }
@@ -96,7 +96,7 @@ void generate_source(std::ostream& ost,
   ost << nspace(args.nspace);
 
   // clang-format off
-  for (const auto& [code, menu] : stamen::menu::menu_lookup)
+  for (const auto& [code, menu] : stamen::menu_lookup)
   {
     ost << func(
             menu.code(),
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
   }
 
   const auto& config = args.config;
-  stamen::menu::read(config.c_str());
+  stamen::read(config.c_str());
 
   const auto include_filename = args.config.stem().replace_extension(".hpp");
   std::ofstream include(include_filename);

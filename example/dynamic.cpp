@@ -2,12 +2,13 @@
 #include <cstddef>
 #include <format>
 #include <iostream>
+#include <limits>
 #include <span>
 
-#include "stamen/menu.hpp"
+#include "stamen/stamen.hpp"
 
 namespace {
-int display(const stamen::menu::menu_t& menu)
+int display(const stamen::menu_t& menu)
 {
   const int sizei   = static_cast<int>(menu.items().size());
   const size_t dgts = static_cast<size_t>(std::log10(sizei)) + 1;
@@ -58,26 +59,26 @@ int display(const stamen::menu::menu_t& menu)
   return 1;
 }
 
-int finish(std::size_t /* unused */)  // NOLINT
+int finish(std::size_t /* unused */)
 {
-  exit(0);
+  exit(0);  // NOLINT
 }
 
-int operation1(std::size_t /* unused */)  // NOLINT
+int operation1(std::size_t /* unused */)
 {
   std::cout << "1\n";
   std::cout << std::flush;
   return 1;
 }
 
-int operation2(std::size_t /* unused */)  // NOLINT
+int operation2(std::size_t /* unused */)
 {
   std::cout << "2\n";
   std::cout << std::flush;
   return 1;
 }
 
-int operation3(std::size_t /* unused */)  // NOLINT
+int operation3(std::size_t /* unused */)
 {
   std::cout << "3\n";
   std::cout << std::flush;
@@ -91,16 +92,16 @@ int main(int argc, char* argv[])
   const std::span args(argv, argv + argc);
 
   // read the configuration
-  for (const auto& arg : args.subspan(1)) stamen::menu::read(arg);
+  for (const auto& arg : args.subspan(1)) stamen::read(arg);
 
   // register free functions
-  stamen::menu::insert("finish", finish);
-  stamen::menu::insert("operation1", operation1);
-  stamen::menu::insert("operation2", operation2);
-  stamen::menu::insert("operation3", operation3);
+  stamen::insert("finish", finish);
+  stamen::insert("operation1", operation1);
+  stamen::insert("operation2", operation2);
+  stamen::insert("operation3", operation3);
 
   // start the menu on specific panel
-  stamen::menu::dynamic("menu_main", display);
+  stamen::dynamic("menu_main", display);
 
   return 0;
 }

@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <format>
 #include <iostream>
+#include <limits>
 
 #include "demo_menu.hpp"
 

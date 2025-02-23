@@ -1,14 +1,16 @@
+#include <cstddef>
 #include <deque>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <tuple>
 #include <unordered_set>
 #include <utility>
 
-#include "stamen/menu.hpp"
+#include "stamen/stamen.hpp"
 
-namespace stamen::menu {
+namespace stamen {
 
 // NOLINTBEGIN
 std::unordered_map<std::string, menu_t> menu_lookup;
@@ -72,8 +74,8 @@ void insert(const char* code, const callback_f& callback)
 
 int dynamic(const char* code, const display_f& disp)
 {
-  menu::display_stub_default = code;
-  menu::display              = disp;
+  display_stub_default = code;
+  display              = disp;
   return display_stub(0);
 }
 
@@ -112,4 +114,4 @@ void menu_t::insert(const std::string& code,
   m_codes.emplace_back(code, prompt);
 }
 
-}  // namespace stamen::menu
+}  // namespace stamen
