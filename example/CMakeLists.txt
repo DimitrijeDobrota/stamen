@@ -9,7 +9,6 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 configure_file(demo_menu.conf demo_menu.conf COPYONLY)
-configure_file(shared.h shared.h COPYONLY)
 
 add_custom_target(run-examples)
 

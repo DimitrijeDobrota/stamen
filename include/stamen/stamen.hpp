@@ -15,8 +15,9 @@ using display_f  = std::function<int(const menu_t&)>;
 
 struct item_t
 {
-  callback_f callback;
+  std::string code;
   std::string prompt;
+  callback_f callback;
 };
 
 // NOLINTBEGIN
@@ -56,12 +57,12 @@ public:
   const std::string& code() const { return m_code; }
   const std::string& title() const { return m_title; }
 
+  std::size_t size() const { return m_items.size(); }
+  const item_t& item(std::size_t idx) const { return m_items[idx]; }
+  item_t& item(std::size_t idx) { return m_items[idx]; }
+
   const auto& items() const { return m_items; }
   auto& items() { return m_items; }
-
-  auto get_callback(std::size_t idx) const { return m_items[idx].callback; }
-  const auto& get_code(std::size_t idx) const { return m_codes[idx].code; }
-  const auto& get_prompt(std::size_t idx) const { return m_codes[idx].prompt; }
 
 private:
   menu_t(std::string code, std::string prompt)
@@ -74,15 +75,8 @@ private:
               const std::string& prompt,
               const callback_f& callback = display_stub);
 
-  struct code_t
-  {
-    std::string code;
-    std::string prompt;
-  };
-
   std::string m_code;
   std::string m_title;
-  std::vector<code_t> m_codes;
   std::vector<item_t> m_items;
 };
 

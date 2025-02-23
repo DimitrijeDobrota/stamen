@@ -69,7 +69,7 @@ void insert(const char* code, const callback_f& callback)
     std::cout << "Stamen: unknown callback registration...\n" << std::flush;
     return;
   }
-  free_lookup.emplace(code, callback);
+  itr->second = callback;
 }
 
 int dynamic(const char* code, const display_f& disp)
@@ -84,7 +84,7 @@ int display_stub(std::size_t idx)
   static std::deque<const menu_t*> stack;
 
   const std::string& code =
-      !stack.empty() ? stack.back()->get_code(idx) : display_stub_default;
+      !stack.empty() ? stack.back()->item(idx).code : display_stub_default;
 
   const auto ml_it = menu_lookup.find(code);
   if (ml_it != menu_lookup.end())
@@ -97,7 +97,10 @@ int display_stub(std::size_t idx)
   }
 
   const auto fl_it = free_lookup.find(code);
-  if (fl_it != free_lookup.end()) return fl_it->second(0);
+  if (fl_it != free_lookup.end() && fl_it->second != nullptr)
+  {
+    return fl_it->second(0);
+  }
 
   std::cout << "Stamen: nothing to do...\n" << std::flush;
   return 1;
@@ -107,11 +110,7 @@ void menu_t::insert(const std::string& code,
                     const std::string& prompt,
                     const callback_f& callback)
 {
-  char* buffer = new char[prompt.size() + 1];  // NOLINT
-  strcpy(buffer, prompt.c_str());  // NOLINT
-
-  m_items.emplace_back(callback, buffer);
-  m_codes.emplace_back(code, prompt);
+  m_items.emplace_back(code, prompt, callback);
 }
 
 }  // namespace stamen

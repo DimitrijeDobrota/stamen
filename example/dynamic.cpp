@@ -19,8 +19,7 @@ int display(const stamen::menu_t& menu)
     std::cout << std::format("{}:\n", menu.title());
     for (auto i = 0UL; i < menu.items().size(); i++)
     {
-      std::cout << std::format(
-          " {:{}}. {}\n", i, dgts, menu.items()[i].prompt);
+      std::cout << std::format(" {:{}}. {}\n", i, dgts, menu.item(i).prompt);
     }
 
     while (true)
@@ -35,8 +34,8 @@ int display(const stamen::menu_t& menu)
         }
 
         const auto uchoice = static_cast<size_t>(choice);
-        std::cout << "Choice: " << menu.items()[uchoice].prompt << "\n\n";
-        const int res = menu.items()[uchoice].callback(uchoice);
+        std::cout << "Choice: " << menu.item(uchoice).prompt << "\n\n";
+        const int res = menu.item(uchoice).callback(uchoice);
 
         if (res < 2) break;
         return res - 1;
@@ -61,7 +60,8 @@ int display(const stamen::menu_t& menu)
 
 int finish(std::size_t /* unused */)
 {
-  exit(0);  // NOLINT
+  // return from everything so that memory can be freed
+  return 1000;
 }
 
 int operation1(std::size_t /* unused */)

@@ -21,11 +21,11 @@ auto accumulate_items(const stamen::menu_t& lmenu)
   using namespace cemplate;  // NOLINT
 
   initlist items;
-  for (auto i = 0UL; i < lmenu.items().size(); i++)
+  for (const auto& [code, prompt, _] : lmenu.items())
   {
     items.emplace_back(initlist({
-        string(lmenu.get_prompt(i)),
-        lmenu.get_code(i),
+        string(prompt),
+        code,
     }));
   }
 
@@ -47,9 +47,12 @@ void generate_include(std::ostream& ost, const arguments_t& args)
   ost << nspace(args.nspace);
 
   ost << R"(
-struct menu_t
+class menu_t
 {
+public:
   using callback_f = std::function<int(std::size_t)>;
+
+  static int visit(const menu_t& menu);
 
   struct item_t
   {
@@ -60,8 +63,6 @@ struct menu_t
   std::string title;
   callback_f callback;
   std::vector<item_t> items;
-
-  static int visit(const menu_t& menu);
 };
 
 )";
