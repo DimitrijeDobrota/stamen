@@ -1,4 +1,4 @@
-#include <format>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -10,11 +10,8 @@
 
 struct arguments_t
 {
-  std::string config;
-  std::string display;
+  std::filesystem::path config;
   std::string nspace = "stamen";
-  bool cpp           = false;
-  bool user          = false;
 };
 
 namespace {
@@ -23,74 +20,19 @@ auto accumulate_items(const stamen::menu::menu_t& lmenu)
 {
   using namespace cemplate;  // NOLINT
 
-  initlist items; for (auto i = 0UL; i < lmenu.get_size(); i++)
+  initlist items;
+  for (auto i = 0UL; i < lmenu.get_size(); i++)
   {
     items.emplace_back(initlist({
-        lmenu.get_code(i),
         string(lmenu.get_prompt(i)),
+        lmenu.get_code(i),
     }));
   }
 
   return initlist_elem(items);
 }
 
-void generate_include_c(std::ostream& ost, const arguments_t& args)
-{
-  using namespace cemplate;  // NOLINT
-
-  ost << pragma_once();
-
-  for (const auto& [code, menu] : stamen::menu::menu_lookup)
-  {
-    ost << func_decl(menu.get_code(), "int", {{"size_t", "/* unused */"}});
-  }
-
-  (void)args;
-}
-
-void generate_source_c(std::ostream& ost, const arguments_t& args)
-{
-  using namespace cemplate;  // NOLINT
-
-  if (args.user)
-  {
-    ost << include("stamen.h", true);
-  }
-  else
-  {
-    ost << include("stamen/stamen.h");
-  }
-
-  ost << std::format("extern int {}(const char *title, ", args.display);
-  ost << "const stamen_item_t itemv[], size_t size);\n\n";
-
-  for (const auto& [code, _] : stamen::menu::free_lookup)
-  {
-    ost << std::format("extern int {}(size_t);\n", code);
-  }
-  ost << '\n';
-
-  for (const auto& [code, menu] : stamen::menu::menu_lookup)
-  {
-    ost << std::format("int {}(size_t /* unused */) {{\n", menu.get_code());
-
-    ost << "\tstatic const stamen_item_t items[] = ";
-
-    ost << "{\n";
-    for (auto i = 0UL; i < menu.get_size(); i++)
-    {
-      ost << "\t\t{ " << menu.get_code(i);
-      ost << ", \"" << menu.get_prompt(i) << "\" },\n";
-    }
-    ost << "\t};\n";
-
-    ost << std::format("\treturn {}(\"{}\"", args.display, menu.get_title());
-    ost << ", items, sizeof(items) / sizeof(items[0]));\n";
-    ost << "}\n\n";
-  }
-}
-
-void generate_include_cpp(std::ostream& ost, const arguments_t& args)
+void generate_include(std::ostream& ost, const arguments_t& args)
 {
   using namespace cemplate;  // NOLINT
 
@@ -105,12 +47,14 @@ void generate_include_cpp(std::ostream& ost, const arguments_t& args)
   ost << nspace(args.nspace);
 
   ost << R"(
-struct menu_t {
+struct menu_t
+{
   using callback_f = std::function<int(std::size_t)>;
 
-  struct item_t {
-    callback_f callback;
+  struct item_t
+  {
     std::string prompt;
+    callback_f callback;
   };
 
   std::string title;
@@ -122,31 +66,34 @@ struct menu_t {
 
 )";
 
-  for (const auto& [code, menu] : stamen::menu::menu_lookup)
+  ost << "// generated function\n";
+  for (const auto& [code, _] : stamen::menu::menu_lookup)
   {
-    ost << func_decl(
-        menu.get_code(), "int", {{"std::size_t", "/* unused */"}});
+    ost << func_decl(code, "int", {{"std::size_t", "/* unused */"}});
+  }
+
+  ost << "\n// free function\n";
+  for (const auto& [code, _] : stamen::menu::free_lookup)
+  {
+    ost << func_decl(code, "int", {{"std::size_t", "/* unused */"}});
   }
 
   ost << nspace(args.nspace);
 }
 
-void generate_source_cpp(std::ostream& ost,
-                         const arguments_t& args,
-                         const std::string& include_name)
+void generate_source(std::ostream& ost,
+                     const arguments_t& args,
+                     const std::string& include_name)
 {
   using namespace cemplate;  // NOLINT
+
+  ost << include("cstddef");
+  ost << '\n';
 
   ost << include(include_name, true);
   ost << '\n';
 
   ost << nspace(args.nspace);
-
-  for (const auto& [code, _] : stamen::menu::free_lookup)
-  {
-    ost << func_decl(code, "extern int", {{"std::size_t", "/* unused */"}});
-  }
-  ost << '\n';
 
   // clang-format off
   for (const auto& [code, menu] : stamen::menu::menu_lookup)
@@ -175,26 +122,8 @@ int parse_opt(int key, const char* arg, poafloc::Parser* parser)
   auto* arguments = static_cast<arguments_t*>(parser->input());
   switch (key)
   {
-    case 'd':
-      arguments->display = arg;
-      break;
     case 'n':
-      if (!arguments->cpp)
-      {
-        poafloc::failure(parser, 0, 0, "Namespace only available in C++ mode");
-        poafloc::help(parser, stderr, poafloc::STD_USAGE);
-        break;
-      }
       arguments->nspace = arg;
-      break;
-    case 'u':
-      arguments->user = true;
-      break;
-    case 666:
-      arguments->cpp = false;
-      break;
-    case 777:
-      arguments->cpp = true;
       break;
     case poafloc::ARG:
       if (!arguments->config.empty())
@@ -208,13 +137,6 @@ int parse_opt(int key, const char* arg, poafloc::Parser* parser)
       poafloc::failure(parser, 0, 0, "Missing an argument");
       poafloc::help(parser, stderr, poafloc::STD_USAGE);
       break;
-    case poafloc::END:
-      if (arguments->display.empty())
-      {
-        if (arguments->cpp) arguments->display = "stamen::builtin_display";
-        else arguments->display = "stamen_builtin_display";
-      }
-      break;
     default:
       break;
   }
@@ -225,14 +147,8 @@ int parse_opt(int key, const char* arg, poafloc::Parser* parser)
 
 // clang-format off
 static const poafloc::option_t options[] {
-    {nullptr, 0, nullptr, 0, "Output mode", 1},
-    {"c", 666, nullptr, 0, "Generate files for C"},
-    {"cpp", 777, nullptr, 0, "Generate files for C++"},
     {nullptr, 0, nullptr, 0, "Output settings", 2},
-    {"display", 'd', "name", 0, "Set display function to be called"},
     {"namespace", 'n', "name", 0, "Namespace, C++ only"},
-    {"user", 'u', nullptr, 0, "Include user stamen headers"},
-    {nullptr, 0, nullptr, 0, "Informational Options", -1},
     {nullptr},
 };
 // clang-format on
@@ -257,30 +173,13 @@ int main(int argc, char* argv[])
   const auto& config = args.config;
   stamen::menu::read(config.c_str());
 
-  const std::string::size_type pos = args.config.rfind('.');
-  const std::string base =
-      pos != std::string::npos ? config.substr(0, pos) : config;
+  const auto include_filename = args.config.stem().replace_extension(".hpp");
+  std::ofstream include(include_filename);
+  generate_include(include, args);
 
-  if (args.cpp)
-  {
-    const auto include_filename = base + ".hpp";
-    std::ofstream include(include_filename);
-    generate_include_cpp(include, args);
-
-    const auto source_filename = base + ".cpp";
-    std::ofstream source(source_filename);
-    generate_source_cpp(source, args, include_filename);
-  }
-  else
-  {
-    const auto include_filename = base + ".h";
-    std::ofstream include(include_filename);
-    generate_include_c(include, args);
-
-    const auto source_filename = base + ".c";
-    std::ofstream source(source_filename);
-    generate_source_c(source, args);
-  }
+  const auto source_filename = args.config.stem().replace_extension(".cpp");
+  std::ofstream source(source_filename);
+  generate_source(source, args, include_filename);
 
   return 0;
 }

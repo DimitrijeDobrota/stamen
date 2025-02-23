@@ -17,7 +17,7 @@ int menu_t::visit(const menu_t& menu)
   return 0;
 }
 
-int operation1(std::size_t /* unused */)  // NOLINT
+int operation1(std::size_t /* unused */)
 {
   std::cout << "operation 1\n\n";
   std::cout << "Some operation is done\n\n";
@@ -25,7 +25,7 @@ int operation1(std::size_t /* unused */)  // NOLINT
   return 1;
 }
 
-int operation2(std::size_t /* unused */)  // NOLINT
+int operation2(std::size_t /* unused */)
 {
   std::cout << "operation 2\n";
   std::cout << "Some other operation is done\n";
@@ -33,7 +33,7 @@ int operation2(std::size_t /* unused */)  // NOLINT
   return 1;
 }
 
-int operation3(std::size_t /* unused */)  // NOLINT
+int operation3(std::size_t /* unused */)
 {
   std::cout << "operation 3\n";
   std::cout << "Yet another operation is done\n";
@@ -41,11 +41,11 @@ int operation3(std::size_t /* unused */)  // NOLINT
   return 1;
 }
 
-int finish(std::size_t /* unused */)  // NOLINT
+int finish(std::size_t /* unused */)
 {
   std::cout << "finishing...\n";
   std::cout << std::flush;
-  exit(0);
+  exit(0);  // NOLINT
 }
 
 }  // namespace example

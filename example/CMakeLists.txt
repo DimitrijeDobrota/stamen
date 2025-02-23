@@ -15,18 +15,10 @@ add_custom_target(run-examples)
 
 add_custom_command(
   OUTPUT demo_menu.hpp demo_menu.cpp
-  COMMAND stamen::exe -d test_display --cpp --namespace example demo_menu.conf
+  COMMAND stamen::exe --namespace example demo_menu.conf
   DEPENDS demo_menu.conf stamen::exe
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
   COMMENT "Generating menu files"
-)
-
-add_custom_command(
-  OUTPUT demo_menu.h demo_menu.c
-  COMMAND stamen::exe --c demo_menu.conf
-  DEPENDS demo_menu.conf stamen::exe
-  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-  COMMENT "Generating cmenu files"
 )
 
 function(add_example NAME EXT)
@@ -39,11 +31,8 @@ function(add_example NAME EXT)
   add_dependencies(run-examples "run_${NAME}")
 endfunction()
 
-add_example(example_c c)
-target_sources(example_c PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/demo_menu.c")
-
-add_example(example_cpp cpp)
-target_sources(example_cpp PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/demo_menu.cpp")
+add_example(static cpp)
+target_sources(static PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/demo_menu.cpp")
 
 add_example(dynamic cpp)
 
