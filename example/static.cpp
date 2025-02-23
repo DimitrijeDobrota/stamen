@@ -1,4 +1,6 @@
+#include <cmath>
 #include <cstddef>
+#include <format>
 #include <iostream>
 
 #include "demo_menu.hpp"
@@ -7,14 +9,52 @@ namespace example {
 
 int menu_t::visit(const menu_t& menu)
 {
-  std::cout << menu.title << '\n';
-  for (auto i = 0UL; i < menu.items.size(); i++)
+  const int sizei   = static_cast<int>(menu.items.size());
+  const size_t dgts = static_cast<size_t>(std::log10(sizei)) + 1;
+  int choice        = 0;
+
+  while (true)
   {
-    std::cout << i + 1 << ": " << menu.items[i].prompt << '\n';
+    std::cout << std::format("{}:\n", menu.title);
+    for (auto i = 0UL; i < menu.items.size(); i++)
+    {
+      std::cout << std::format(" {:{}}. {}\n", i, dgts, menu.items[i].prompt);
+    }
+
+    while (true)
+    {
+      std::cout << "Choose an option: ";
+      if (std::cin >> choice && choice >= -1 && choice < sizei)
+      {
+        if (choice == -1)
+        {
+          std::cout << "Choice: back\n";
+          return 1;
+        }
+
+        const auto uchoice = static_cast<size_t>(choice);
+        std::cout << "Choice: " << menu.items[uchoice].prompt << "\n\n";
+        const int res = menu.items[uchoice].callback(uchoice);
+
+        if (res < 2) break;
+        return res - 1;
+      }
+
+      if (std::cin.eof())
+      {
+        std::cerr << "encountered end of input!\n";
+        return std::numeric_limits<int>::max();
+      }
+
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      std::cout << "Invalid option, please choose again!\n";
+    }
+
+    std::cout << '\n' << std::flush;
   }
-  std::cout << "Auto calling option 1...\n";
-  menu.items[1].callback(1);
-  return 0;
+
+  return 1;
 }
 
 int operation1(std::size_t /* unused */)

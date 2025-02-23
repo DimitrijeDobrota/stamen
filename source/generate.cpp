@@ -21,7 +21,7 @@ auto accumulate_items(const stamen::menu::menu_t& lmenu)
   using namespace cemplate;  // NOLINT
 
   initlist items;
-  for (auto i = 0UL; i < lmenu.get_size(); i++)
+  for (auto i = 0UL; i < lmenu.items().size(); i++)
   {
     items.emplace_back(initlist({
         string(lmenu.get_prompt(i)),
@@ -99,18 +99,18 @@ void generate_source(std::ostream& ost,
   for (const auto& [code, menu] : stamen::menu::menu_lookup)
   {
     ost << func(
-            menu.get_code(),
+            menu.code(),
             "extern int",
             {{"std::size_t", "/* unused */"}}
         )
         << decl("static const menu_t", "menu")
         << initlist({
-               string(menu.get_title()),
-               menu.get_code(),
+               string(menu.title()),
+               menu.code(),
                accumulate_items(menu),
            })
         << ret("menu_t::visit(menu)")
-        << func(menu.get_code());
+        << func(menu.code());
   }
   // clang-format on
 

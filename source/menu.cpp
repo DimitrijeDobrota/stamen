@@ -59,7 +59,7 @@ void read(const char* filename)
   }
 }
 
-void insert(const char* code, callback_f callback)
+void insert(const char* code, const callback_f& callback)
 {
   auto itr = free_lookup.find(code);
   if (itr == free_lookup.end())
@@ -70,7 +70,7 @@ void insert(const char* code, callback_f callback)
   free_lookup.emplace(code, callback);
 }
 
-int dynamic(const char* code, display_f disp)
+int dynamic(const char* code, const display_f& disp)
 {
   menu::display_stub_default = code;
   menu::display              = disp;
@@ -87,11 +87,8 @@ int display_stub(std::size_t idx)
   const auto ml_it = menu_lookup.find(code);
   if (ml_it != menu_lookup.end())
   {
-    const auto& m = ml_it->second;  // NOLINT
-
-    stack.push_back(&m);
-    const int ret =
-        display(m.get_title().c_str(), m.get_itemv(), m.get_size());
+    stack.push_back(&ml_it->second);
+    const int ret = display(ml_it->second);
     stack.pop_back();
 
     return ret;
@@ -106,7 +103,7 @@ int display_stub(std::size_t idx)
 
 void menu_t::insert(const std::string& code,
                     const std::string& prompt,
-                    callback_f callback)
+                    const callback_f& callback)
 {
   char* buffer = new char[prompt.size() + 1];  // NOLINT
   strcpy(buffer, prompt.c_str());  // NOLINT
