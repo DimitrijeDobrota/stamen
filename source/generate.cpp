@@ -34,6 +34,7 @@ auto accumulate_items(const stamen::menu_t& lmenu)
 
 void generate_include(std::ostream& ost, const arguments_t& args)
 {
+  using namespace std::string_literals;  // NOLINT
   using namespace cemplate;  // NOLINT
 
   ost << pragma_once();
@@ -70,13 +71,13 @@ public:
   ost << "// generated function\n";
   for (const auto& [code, _] : stamen::menu_lookup)
   {
-    ost << func_decl(code, "int", {{"std::size_t", "/* unused */"}});
+    ost << func_decl(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
   }
 
   ost << "\n// free function\n";
   for (const auto& [code, _] : stamen::free_lookup)
   {
-    ost << func_decl(code, "int", {{"std::size_t", "/* unused */"}});
+    ost << func_decl(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
   }
 
   ost << nspace(args.nspace);
@@ -86,6 +87,7 @@ void generate_source(std::ostream& ost,
                      const arguments_t& args,
                      const std::string& include_name)
 {
+  using namespace std::string_literals;  // NOLINT
   using namespace cemplate;  // NOLINT
 
   ost << include("cstddef");
@@ -102,7 +104,7 @@ void generate_source(std::ostream& ost,
     ost << func(
             menu.code(),
             "extern int",
-            {{"std::size_t", "/* unused */"}}
+            {{{"std::size_t"s, "/* unused */"s}}}
         )
         << decl("static const menu_t", "menu")
         << initlist({

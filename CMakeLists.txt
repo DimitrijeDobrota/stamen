@@ -14,7 +14,7 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 find_package(poafloc 1.1 CONFIG REQUIRED)
-find_package(cemplate 0.1.6 CONFIG REQUIRED)
+find_package(cemplate 0.1.7 CONFIG REQUIRED)
 
 # ---- Declare library ----
 
@@ -66,7 +66,7 @@ target_compile_features(stamen_stamen PUBLIC cxx_std_20)
 add_executable(stamen_exe source/generate.cpp)
 add_executable(stamen::exe ALIAS stamen_exe)
 
-target_link_libraries(stamen_exe PUBLIC cemplate::cemplate)
+target_link_libraries(stamen_exe PRIVATE cemplate::cemplate)
 target_link_libraries(stamen_exe PRIVATE stamen::stamen)
 set_property(TARGET stamen_exe PROPERTY OUTPUT_NAME stamen)
 

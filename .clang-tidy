@@ -26,6 +26,7 @@ Checks: "*,\
   -modernize-use-nodiscard,\
   -modernize-use-trailing-return-type,\
   -readability-function-cognitive-complexity,\
+  -misc-include-cleaner,\
   -readability-magic-numbers
 "
 WarningsAsErrors: ''
