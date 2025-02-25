@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstddef>
 #include <format>
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <span>
@@ -8,7 +9,7 @@
 #include "stamen/stamen.hpp"
 
 namespace {
-int display(const stamen::menu_t& menu)
+int display(const stamen::Menu& menu)
 {
   const int sizei   = static_cast<int>(menu.items().size());
   const size_t dgts = static_cast<size_t>(std::log10(sizei)) + 1;
@@ -91,17 +92,25 @@ int main(int argc, char* argv[])
 {
   const std::span args(argv, argv + argc);
 
+  if (argc != 2)
+  {
+    std::cout << std::format("Usage: {} filename\n", args[0]);
+    return 1;
+  }
+
+  std::ifstream ifs(args[1]);
+
   // read the configuration
-  for (const auto& arg : args.subspan(1)) stamen::read(arg);
+  stamen::Stamen inst(ifs);
 
   // register free functions
-  stamen::insert("finish", finish);
-  stamen::insert("operation1", operation1);
-  stamen::insert("operation2", operation2);
-  stamen::insert("operation3", operation3);
+  inst.insert("finish", finish);
+  inst.insert("operation1", operation1);
+  inst.insert("operation2", operation2);
+  inst.insert("operation3", operation3);
 
   // start the menu on specific panel
-  stamen::dynamic("menu_main", display);
+  inst.dynamic("menu_main", display);
 
   return 0;
 }

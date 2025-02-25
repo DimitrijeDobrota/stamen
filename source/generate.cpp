@@ -16,7 +16,7 @@ struct arguments_t
 
 namespace {
 
-auto accumulate_items(const stamen::menu_t& lmenu)
+auto accumulate_items(const stamen::Menu& lmenu)
 {
   using namespace cemplate;  // NOLINT
 
@@ -32,7 +32,9 @@ auto accumulate_items(const stamen::menu_t& lmenu)
   return initlist_elem(items);
 }
 
-void generate_include(std::ostream& ost, const arguments_t& args)
+void generate_include(std::ostream& ost,
+                      const stamen::Stamen& inst,
+                      const arguments_t& args)
 {
   using namespace std::string_literals;  // NOLINT
   using namespace cemplate;  // NOLINT
@@ -48,9 +50,8 @@ void generate_include(std::ostream& ost, const arguments_t& args)
   ost << nspace(args.nspace);
 
   ost << R"(
-class menu_t
+struct menu_t
 {
-public:
   using callback_f = std::function<int(std::size_t)>;
 
   static int visit(const menu_t& menu);
@@ -69,13 +70,13 @@ public:
 )";
 
   ost << "// generated function\n";
-  for (const auto& [code, _] : stamen::menu_lookup)
+  for (const auto& [code, _] : inst.menu_lookup())
   {
     ost << func_decl(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
   }
 
   ost << "\n// free function\n";
-  for (const auto& [code, _] : stamen::free_lookup)
+  for (const auto& [code, _] : inst.free_lookup())
   {
     ost << func_decl(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
   }
@@ -84,6 +85,7 @@ public:
 }
 
 void generate_source(std::ostream& ost,
+                     const stamen::Stamen& inst,
                      const arguments_t& args,
                      const std::string& include_name)
 {
@@ -99,7 +101,7 @@ void generate_source(std::ostream& ost,
   ost << nspace(args.nspace);
 
   // clang-format off
-  for (const auto& [code, menu] : stamen::menu_lookup)
+  for (const auto& [code, menu] : inst.menu_lookup())
   {
     ost << func(
             menu.code(),
@@ -173,16 +175,16 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  const auto& config = args.config;
-  stamen::read(config.c_str());
+  std::ifstream ifs(args.config);
+  const stamen::Stamen inst(ifs);
 
   const auto include_filename = args.config.stem().replace_extension(".hpp");
   std::ofstream include(include_filename);
-  generate_include(include, args);
+  generate_include(include, inst, args);
 
   const auto source_filename = args.config.stem().replace_extension(".cpp");
   std::ofstream source(source_filename);
-  generate_source(source, args, include_filename);
+  generate_source(source, inst, args, include_filename);
 
   return 0;
 }

@@ -1,35 +1,40 @@
 #include <cstddef>
-#include <deque>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <tuple>
 #include <unordered_set>
 #include <utility>
 
 #include "stamen/stamen.hpp"
 
+namespace {
+
+void warning(const std::string& message, const std::string& addition)
+{
+  std::cerr << "Stamen: " << message;
+  if (!addition.empty())
+  {
+    std::cerr << ":  " + addition;
+  }
+  std::cerr << '\n' << std::flush;
+}
+
+}  // namespace
+
 namespace stamen {
 
-// NOLINTBEGIN
-std::unordered_map<std::string, menu_t> menu_lookup;
-std::unordered_map<std::string, callback_f> free_lookup;
-std::string display_stub_default;
-display_f display;
-// NOLINTEND
-
-void read(const char* filename)
+Stamen::Stamen(std::istream& ist)
 {
+  using namespace std::placeholders;  // NOLINT
+
   std::unordered_set<std::string> refd;
-  std::fstream fst(filename);
   std::string line;
   std::string delim;
   std::string code;
   std::string prompt;
 
-  auto last = menu_lookup.end();
-  while (std::getline(fst, line))
+  auto last = m_menu_lookup.end();
+  while (std::getline(ist, line))
   {
     if (line.empty()) continue;
 
@@ -39,74 +44,75 @@ void read(const char* filename)
 
     if (delim != "+")
     {
-      last->second.insert(code, prompt);
+      last->second.insert(code,
+                          prompt,
+                          [&](std::size_t idx)
+                          { return this->display_stub(idx); });
       refd.insert(code);
     }
     else
     {
-      const auto [iter, succ] = menu_lookup.emplace(
-          std::piecewise_construct,
-          std::forward_as_tuple(code),
-          std::forward_as_tuple(menu_t::private_ctor_t {}, code, prompt));
+      const auto [iter, succ] =
+          m_menu_lookup.emplace(code, Menu(code, prompt));
       last = iter;
     }
   }
 
   for (const auto& ref : refd)
   {
-    if (!menu_lookup.contains(ref))
+    if (!m_menu_lookup.contains(ref))
     {
-      free_lookup.emplace(ref, nullptr);
+      m_free_lookup.emplace(ref, nullptr);
     }
   }
 }
 
-void insert(const char* code, const callback_f& callback)
+void Stamen::insert(const std::string& code, const callback_f& callback)
 {
-  auto itr = free_lookup.find(code);
-  if (itr == free_lookup.end())
+  auto itr = m_free_lookup.find(code);
+  if (itr == m_free_lookup.end())
   {
-    std::cout << "Stamen: unknown callback registration...\n" << std::flush;
+    warning("unknown callback registration", code);
     return;
   }
   itr->second = callback;
 }
 
-int dynamic(const char* code, const display_f& disp)
+int Stamen::dynamic(const std::string& code, const display_f& disp)
 {
-  display_stub_default = code;
-  display              = disp;
+  m_stub_default = code;
+  m_stub_display = disp;
   return display_stub(0);
 }
 
-int display_stub(std::size_t idx)
+int Stamen::display_stub(std::size_t idx)
 {
-  static std::deque<const menu_t*> stack;
+  const std::string& code = !m_stub_stack.empty()
+      ? m_stub_stack.top()->item(idx).code
+      : m_stub_default;
 
-  const std::string& code =
-      !stack.empty() ? stack.back()->item(idx).code : display_stub_default;
-
-  const auto ml_it = menu_lookup.find(code);
-  if (ml_it != menu_lookup.end())
+  const auto mit = m_menu_lookup.find(code);
+  if (mit != m_menu_lookup.end())
   {
-    stack.push_back(&ml_it->second);
-    const int ret = display(ml_it->second);
-    stack.pop_back();
+    m_stub_stack.push(&mit->second);
+    const int ret = m_stub_display(mit->second);
+    m_stub_stack.pop();
 
     return ret;
   }
 
-  const auto fl_it = free_lookup.find(code);
-  if (fl_it != free_lookup.end() && fl_it->second != nullptr)
+  const auto fit = m_free_lookup.find(code);
+  if (fit != m_free_lookup.end() && fit->second != nullptr)
   {
-    return fl_it->second(0);
+    return fit->second(0);
   }
 
-  std::cout << "Stamen: nothing to do...\n" << std::flush;
+  warning("no callback for", code);
+
   return 1;
 }
 
-void menu_t::insert(const std::string& code,
+void Menu::insert(const std::string& code,
                     const std::string& prompt,
                     const callback_f& callback)
 {
