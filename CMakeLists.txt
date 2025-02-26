@@ -4,7 +4,7 @@ include(cmake/prelude.cmake)
 
 project(
     stamen
-    VERSION 1.2.8
+    VERSION 1.2.9
     DESCRIPTION "Static menu generator"
     HOMEPAGE_URL "https://git.dimitrijedobrota.com/stamen"
     LANGUAGES C CXX
