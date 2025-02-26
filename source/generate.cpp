@@ -20,16 +20,16 @@ auto accumulate_items(const stamen::Menu& lmenu)
 {
   using namespace cemplate;  // NOLINT
 
-  initlist items;
+  Initlist items;
   for (const auto& [code, prompt, _] : lmenu.items())
   {
-    items.emplace_back(initlist({
-        string(prompt),
+    items.emplace_back(Initlist({
+        String(prompt),
         code,
     }));
   }
 
-  return initlist_elem(items);
+  return InitlistElem(items);
 }
 
 void generate_include(std::ostream& ost,
@@ -39,15 +39,15 @@ void generate_include(std::ostream& ost,
   using namespace std::string_literals;  // NOLINT
   using namespace cemplate;  // NOLINT
 
-  ost << pragma_once();
+  ost << Pragma("once") << '\n';
 
-  ost << include("cstddef");
-  ost << include("functional");
-  ost << include("string");
-  ost << include("vector");
+  ost << Include("cstddef");
+  ost << Include("functional");
+  ost << Include("string");
+  ost << Include("vector");
   ost << '\n';
 
-  ost << nspace(args.nspace);
+  ost << Namespace(args.nspace);
 
   ost << R"(
 struct menu_t
@@ -72,16 +72,16 @@ struct menu_t
   ost << "// generated function\n";
   for (const auto& [code, _] : inst.menu_lookup())
   {
-    ost << func_decl(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
+    ost << FunctionD(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
   }
 
   ost << "\n// free function\n";
   for (const auto& [code, _] : inst.free_lookup())
   {
-    ost << func_decl(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
+    ost << FunctionD(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
   }
 
-  ost << nspace(args.nspace);
+  ost << Namespace(args.nspace);
 }
 
 void generate_source(std::ostream& ost,
@@ -92,34 +92,31 @@ void generate_source(std::ostream& ost,
   using namespace std::string_literals;  // NOLINT
   using namespace cemplate;  // NOLINT
 
-  ost << include("cstddef");
-  ost << '\n';
+  ost << Include("cstddef") << '\n';
+  ost << IncludeL(include_name) << '\n';
 
-  ost << include(include_name, true);
-  ost << '\n';
-
-  ost << nspace(args.nspace);
+  ost << Namespace(args.nspace);
 
   // clang-format off
   for (const auto& [code, menu] : inst.menu_lookup())
   {
-    ost << func(
+    ost << Function(
             menu.code(),
             "extern int",
             {{{"std::size_t"s, "/* unused */"s}}}
         )
-        << decl("static const menu_t", "menu")
-        << initlist({
-               string(menu.title()),
+        << Declaration("static const menu_t", "menu",
+         Initlist({
+               String(menu.title()),
                menu.code(),
                accumulate_items(menu),
-           })
-        << ret("menu_t::visit(menu)")
-        << func(menu.code());
+           }))
+        << Return("menu_t::visit(menu)")
+        << Function(menu.code());
   }
   // clang-format on
 
-  ost << nspace(args.nspace);
+  ost << Namespace(args.nspace);
 }
 
 int parse_opt(int key, const char* arg, poafloc::Parser* parser)
@@ -152,9 +149,10 @@ int parse_opt(int key, const char* arg, poafloc::Parser* parser)
 
 // clang-format off
 static const poafloc::option_t options[] {
-    {nullptr, 0, nullptr, 0, "Output settings", 2},
-    {"namespace", 'n', "name", 0, "Namespace, C++ only"},
-    {nullptr},
+    {    nullptr,   0, nullptr, 0, "Output settings", 2},
+    {"namespace", 'n',  "name", 0, "Name of the nemespace to generate in"},
+    {    nullptr,   0, nullptr, 0, "Informational Options", -1},
+    {    nullptr},
 };
 // clang-format on
 

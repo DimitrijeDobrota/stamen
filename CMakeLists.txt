@@ -4,7 +4,7 @@ include(cmake/prelude.cmake)
 
 project(
     stamen
-    VERSION 1.2.7
+    VERSION 1.2.8
     DESCRIPTION "Static menu generator"
     HOMEPAGE_URL "https://git.dimitrijedobrota.com/stamen"
     LANGUAGES C CXX
@@ -13,8 +13,8 @@ project(
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
-find_package(poafloc 1.1 CONFIG REQUIRED)
-find_package(cemplate 0.1.7 CONFIG REQUIRED)
+find_package(poafloc 1.2 CONFIG REQUIRED)
+find_package(cemplate 0.2 CONFIG REQUIRED)
 
 # ---- Declare library ----
 
