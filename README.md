@@ -22,18 +22,16 @@ The main advantage of stamen is two modes it can operate in:
 
 * CMake 3.14 or latter
 * Compiler with C++20 support (tested: clang 19.1.7, gcc 14.2.1)
-* [`Cemplate 0.2`](https://github.com/DimitrijeDobrota/cemplate)
-* [`Poafloc 1.2`](https://github.com/DimitrijeDobrota/poafloc)
 
 
 ## Building and installing
 
-See the [BUILDING](BUILDING.md) document.
+See the [`BUILDING`](BUILDING.md) document.
 
 
 ## Usage
 
-> Please reference example folder for relevant usage example.
+> Please reference example folder for relevant usage examples.
 
 > Refer to example/CMakeLists.txt to see how to integrate stamen into build system
 
@@ -169,7 +167,6 @@ See the [`CONTRIBUTING`](CONTRIBUTING.md) document.
 
 ## License
 
-This project is licensed under the MIT License -
-see the [`LICENSE`](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [`LICENSE`](LICENSE.md) file for details
 
 
