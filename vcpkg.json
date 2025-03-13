@@ -1,10 +1,10 @@
 {
   "name": "stamen",
-  "version-semver": "1.3.0",
+  "version-semver": "1.3.1",
   "dependencies": [
     {
       "name": "cemplate",
-      "version>=": "0.2.0"
+      "version>=": "0.3.0"
     },
     {
       "name": "poafloc",

@@ -16,22 +16,6 @@ struct arguments_t
 
 namespace {
 
-auto accumulate_items(const stamen::Menu& lmenu)
-{
-  using namespace cemplate;  // NOLINT
-
-  Initlist items;
-  for (const auto& [code, prompt, _] : lmenu.items())
-  {
-    items.emplace_back(Initlist({
-        String(prompt),
-        code,
-    }));
-  }
-
-  return InitlistElem(items);
-}
-
 void generate_include(std::ostream& ost,
                       const stamen::Stamen& inst,
                       const arguments_t& args)
@@ -39,17 +23,23 @@ void generate_include(std::ostream& ost,
   using namespace std::string_literals;  // NOLINT
   using namespace cemplate;  // NOLINT
 
-  ost << Pragma("once") << '\n';
+  Program prog(ost);
 
-  ost << Include("cstddef");
-  ost << Include("functional");
-  ost << Include("string");
-  ost << Include("vector");
-  ost << '\n';
+  const auto func_f = [&prog](const auto& pair)
+  {
+    prog.function_decl(
+        pair.first, "int", {{{"std::size_t"s, "/* unused */"s}}});
+  };
 
-  ost << Namespace(args.nspace);
-
-  ost << R"(
+  prog.pragma("once")
+      .line_empty()
+      .include("cstddef")
+      .include("functional")
+      .include("string")
+      .include("vector")
+      .line_empty()
+      .namespace_open(args.nspace)
+      .value(R"(
 struct menu_t
 {
   using callback_f = std::function<int(std::size_t)>;
@@ -67,21 +57,18 @@ struct menu_t
   std::vector<item_t> items;
 };
 
-)";
+)");
 
-  ost << "// generated function\n";
-  for (const auto& [code, _] : inst.menu_lookup())
-  {
-    ost << FunctionD(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
-  }
+  prog.comment("generated function");
+  std::for_each(
+      std::begin(inst.menu_lookup()), std::end(inst.menu_lookup()), func_f);
+  prog.line_empty();
 
-  ost << "\n// free function\n";
-  for (const auto& [code, _] : inst.free_lookup())
-  {
-    ost << FunctionD(code, "int", {{{"std::size_t"s, "/* unused */"s}}});
-  }
+  prog.comment("free function");
+  std::for_each(
+      std::begin(inst.free_lookup()), std::end(inst.free_lookup()), func_f);
 
-  ost << Namespace(args.nspace);
+  prog.namespace_close(args.nspace);
 }
 
 void generate_source(std::ostream& ost,
@@ -92,31 +79,41 @@ void generate_source(std::ostream& ost,
   using namespace std::string_literals;  // NOLINT
   using namespace cemplate;  // NOLINT
 
-  ost << Include("cstddef") << '\n';
-  ost << IncludeL(include_name) << '\n';
-
-  ost << Namespace(args.nspace);
-
-  // clang-format off
-  for (const auto& [code, menu] : inst.menu_lookup())
+  const auto init_f = [](const auto& menu)
   {
-    ost << Function(
-            menu.code(),
-            "extern int",
-            {{{"std::size_t"s, "/* unused */"s}}}
-        )
-        << Declaration("static const menu_t", "menu",
-         Initlist({
-               String(menu.title()),
-               menu.code(),
-               accumulate_items(menu),
-           }))
-        << Return("menu_t::visit(menu)")
-        << Function(menu.code());
-  }
-  // clang-format on
+    return InitlistNode({
+        string(menu.title()),
+        menu.code(),
+        InitlistNode(std::begin(menu.items()),
+                     std::end(menu.items()),
+                     [](const auto& item) -> InitlistNode
+                     {
+                       return {
+                           string(item.prompt),
+                           item.code,
+                       };
+                     }),
+    });
+  };
 
-  ost << Namespace(args.nspace);
+  Program prog(ost);
+
+  prog.include("cstddef")
+      .line_empty()
+      .includeL(include_name)
+      .line_empty()
+      .namespace_open(args.nspace);
+
+  for (const auto& [_, menu] : inst.menu_lookup())
+  {
+    prog.function_open(
+            menu.code(), "extern int", {{{"std::size_t"s, "/* unused */"s}}})
+        .declaration("static const menu_t", "menu", init_f(menu))
+        .ret("menu_t::visit(menu)")
+        .function_close(menu.code());
+  }
+
+  prog.namespace_close(args.nspace);
 }
 
 int parse_opt(int key, const char* arg, poafloc::Parser* parser)
